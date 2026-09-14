@@ -65,7 +65,13 @@ git switch -c 加XX题
 git switch main && git merge 加XX题
 ```
 
-`.wrangler/` 是本地缓存，已 ignore。暂时没有远端，只有本机历史。
+`.wrangler/` 是本地缓存，已 ignore。
+
+远端：<https://github.com/Akagilnc/ak-chuzhong-site>（公开仓库）。
+
+> 仓库公开 = 答案的 base64 谁都能解。不过页面本身就是公开网站，
+> 查看源代码拿到的是同一份 HTML，所以并没有比原来更容易抄 —— 那层编码本来就只是门槛，不是保密。
+> **真要藏的东西（密钥之类）一律不进这个仓库。**
 
 ## 部署
 
