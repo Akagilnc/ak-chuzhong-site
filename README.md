@@ -55,6 +55,18 @@ ak-chuzhong-site/
    ```
 5. 部署。
 
+## 版本控制
+
+本目录是 git 仓库（2026-09-14 起）。改之前先开分支，`main` 保持是线上那一版：
+
+```bash
+git switch -c 加XX题
+# 改、部署、验完
+git switch main && git merge 加XX题
+```
+
+`.wrangler/` 是本地缓存，已 ignore。暂时没有远端，只有本机历史。
+
 ## 部署
 
 ```bash
