@@ -1,0 +1,443 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>正方体切正六边形</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Serif:wght@500;600&display=swap">
+<link rel="stylesheet" href="../base.css?v=2">
+<style>
+/* 这条必须留在页面自己的 style 里，不能只写在 base.css：
+   外链 CSS 会被浏览器缓存（zone 规则 max-age=14400，改不了），
+   拿到旧文件时 .finish 的 display:flex 就会顶掉 hidden 属性 —— 答案直接露出来。
+   样式旧一点无所谓，答案露出来不行。 */
+[hidden]{display:none !important}
+
+/* 切面演示 */
+.demo{display:grid; grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr); gap:clamp(18px,3vw,34px); align-items:center}
+@media (max-width:680px){.demo{grid-template-columns:1fr}}
+.demo svg{width:100%; height:auto; display:block}
+.readout{display:flex; flex-direction:column; gap:14px}
+.shape{
+  font-family:"IBM Plex Serif",Georgia,serif; font-size:clamp(26px,4.4vw,36px);
+  font-weight:600; color:var(--cut); line-height:1.2;
+}
+.shape em{display:block; font-style:normal; font-family:"IBM Plex Mono",ui-monospace,monospace;
+  font-size:12px; letter-spacing:.18em; color:var(--ink-3); font-weight:500; margin-bottom:6px}
+input[type=range]{width:100%; accent-color:var(--cut); margin:0}
+.scale{display:flex; justify-content:space-between; font-family:"IBM Plex Mono",ui-monospace,monospace;
+  font-size:11px; color:var(--ink-3); letter-spacing:.06em}
+.hint{margin:0; font-size:14px; color:var(--ink-2)}
+.hint b{color:var(--ink); font-weight:600}
+
+/* 三条规则 */
+.rules{display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:16px}
+.rule{background:var(--card); border:1px solid var(--edge); border-radius:3px; padding:20px;
+  display:flex; flex-direction:column; gap:12px; box-shadow:var(--shadow)}
+.rule svg{width:100%; height:auto; display:block}
+.rule h3{margin:0; font-size:17px; font-weight:650; line-height:1.45; text-wrap:balance}
+.rule p{margin:0; font-size:14px; color:var(--ink-2); line-height:1.7}
+.rule .tag{font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:11px;
+  letter-spacing:.2em; color:var(--ink-3); text-transform:uppercase}
+
+/* 四张展开图 */
+.nets{display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:16px}
+.net{background:var(--card); border:1px solid var(--edge); border-radius:3px; padding:18px 18px 20px;
+  display:flex; flex-direction:column; gap:12px; box-shadow:var(--shadow); position:relative}
+.net.good{border-color:color-mix(in srgb, var(--ok) 45%, var(--edge))}
+.net.bad{border-color:color-mix(in srgb, var(--no) 55%, var(--edge))}
+.net header{display:flex; align-items:center; justify-content:space-between; gap:12px}
+.net .id{font-family:"IBM Plex Serif",Georgia,serif; font-size:26px; font-weight:600; line-height:1}
+.verdict{font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:12px; font-weight:600;
+  letter-spacing:.14em; padding:.3em .8em; border-radius:999px}
+.good .verdict{color:var(--ok); background:var(--ok-soft)}
+.bad .verdict{color:var(--no); background:var(--no-soft)}
+.net .art{overflow-x:auto}
+.net svg{display:block; margin:0 auto; width:100%; max-width:330px; height:auto}
+.why{margin:0; font-size:14px; line-height:1.7; color:var(--ink-2)}
+.why b{color:var(--ink); font-weight:600}
+.bad .why b{color:var(--no)}
+
+.finish{
+  display:flex; flex-wrap:wrap; align-items:center; gap:clamp(14px,3vw,30px);
+  border-top:2px solid var(--ink); padding-top:22px;
+}
+.finish .big{
+  font-family:"IBM Plex Serif",Georgia,serif; font-size:clamp(40px,9vw,72px); font-weight:600;
+  line-height:1; letter-spacing:.02em; color:var(--ok);
+}
+.finish p{margin:0; color:var(--ink-2); font-size:15px; max-width:30em}
+
+/* 自己判 → 对答案 */
+.choice{display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-top:2px}
+.choice .ask{font-size:13px; color:var(--ink-3); margin-right:2px}
+.choice button{
+  font:inherit; font-size:13.5px; font-weight:600; color:var(--ink-2);
+  background:transparent; border:1.5px solid var(--edge); border-radius:999px;
+  padding:.34em 1.05em; cursor:pointer; transition:border-color .12s, color .12s, background .12s;
+}
+.choice button:hover{border-color:var(--cut); color:var(--cut)}
+.choice button[aria-pressed="true"]{border-color:var(--cut); color:var(--cut); background:var(--cut-fill)}
+.picked{margin:2px 0 0; font-size:13.5px; font-weight:600}
+.picked.hit{color:var(--ok)}
+.picked.miss{color:var(--no)}
+.score{margin:0; font-size:15px; font-weight:600; color:var(--ink)}
+.reveal-bar{display:flex; flex-wrap:wrap; align-items:center; gap:14px; margin-top:18px}
+.reveal-bar p{margin:0; font-size:14px; color:var(--ink-3); font-variant-numeric:tabular-nums}
+.reveal-bar p b{color:var(--ink); font-weight:600}
+</style>
+</head>
+<body>
+<main>
+  <header class="head">
+    <p class="back"><a href="../">← 初中图解</a></p>
+    <p class="eyebrow">初中几何 · 正方体展开图</p>
+    <h1>把正方体切出一个正六边形</h1>
+    <p class="lede">题目问：①②③④ 四张展开图里，切割线画对的是哪几个？先把下面三条规则弄懂，然后一张一张自己判。判完当场就知道对不对。</p>
+  </header>
+
+  <section>
+    <h2><span class="n">01</span>这一刀切在哪</h2>
+    <p class="sub">拉一下滑块，让刀面从一个角平移到对角。大部分位置切出来是三角形、四边形、五边形——只有<b>不偏不倚的正中间</b>那一刀，切面才是正六边形。</p>
+    <div class="slab demo">
+      <div id="cubeWrap"></div>
+      <div class="readout">
+        <div class="shape"><em>切面形状</em><span id="shapeName">正六边形</span></div>
+        <div>
+          <input type="range" id="tSlider" min="0.06" max="2.94" step="0.02" value="1.5" aria-label="刀面位置">
+          <div class="scale"><span>贴着一个角</span><span>正中间</span><span>贴着对角</span></div>
+        </div>
+        <p class="hint" id="hint">六个顶点正好落在<b>六条棱的中点</b>上。</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="n">02</span>三条规则</h2>
+    <p class="sub">这一刀在每个面上都留下一道痕。把正方体摊平，这六道痕必须同时满足下面三条。</p>
+    <div class="rules">
+      <div class="rule">
+        <span class="tag">Rule 1</span>
+        <div id="ruleA"></div>
+        <h3>每格只是「切掉一个角」</h3>
+        <p>那道痕连的是<b>相邻两条边的中点</b>，斜着跨半格。<strong>不是整格的大对角线</strong>。</p>
+      </div>
+      <div class="rule">
+        <span class="tag">Rule 2</span>
+        <div id="ruleB"></div>
+        <h3>过折缝要「直着穿过去」</h3>
+        <p>两格之间若有痕相接，接点必在折缝中点，且摊平后两段<b>连成一条直线</b>。拐回去就接不上。</p>
+      </div>
+      <div class="rule">
+        <span class="tag">Rule 3</span>
+        <div id="ruleC"></div>
+        <h3>要么都碰，要么都不碰</h3>
+        <p>一条折缝上，两边的痕<b>同时碰</b>或<b>同时躲开</b>。一边碰一边不碰，折起来就断了。</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="n">03</span>逐个验</h2>
+    <p class="sub">按上面三条查。<b>每张自己先给个判断</b>——点下去才会告诉你对不对，以及错在哪一笔。</p>
+    <div class="nets" id="netGrid"></div>
+    <div class="reveal-bar" id="revealBar">
+      <p id="barMsg">还剩 <b>4</b> 张没判</p>
+    </div>
+  </section>
+
+  <section class="finish" id="finish" hidden>
+    <div class="big" id="bigAns"></div>
+    <p class="score" id="score"></p>
+    <p id="finWhy"></p>
+  </section>
+</main>
+
+<script>
+const NS = "http://www.w3.org/2000/svg";
+const el = (n, a = {}) => { const e = document.createElementNS(NS, n); for (const k in a) e.setAttribute(k, a[k]); return e; };
+const svg = (w, h) => el("svg", { viewBox: `0 0 ${w} ${h}`, xmlns: NS });
+
+/* ---------- 1. 正方体 + 可移动的切面 ---------- */
+const sub = (a, b) => a.map((v, i) => v - b[i]);
+const dot = (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2];
+const crs = (a, b) => [a[1] * b[2] - a[2] * b[1], a[2] * b[0] - a[0] * b[2], a[0] * b[1] - a[1] * b[0]];
+const nrm = v => { const L = Math.hypot(...v); return v.map(c => c / L); };
+
+const CAM = nrm([1.0, 0.62, 0.56]);
+const RIGHT = nrm(crs([0, 0, 1], CAM));
+const CUP = crs(CAM, RIGHT);
+const CW = 340, CH = 300, SCALE = 118, CX = CW / 2, CY = CH / 2 + 6;
+const prj = p => { const q = sub(p, [.5, .5, .5]); return [CX + dot(q, RIGHT) * SCALE, CY - dot(q, CUP) * SCALE]; };
+
+const CORNERS = [];
+for (let i = 0; i < 8; i++) CORNERS.push([i & 1, (i >> 1) & 1, (i >> 2) & 1]);
+const EDGES = [];
+for (let i = 0; i < 8; i++) for (let j = i + 1; j < 8; j++) {
+  const d = CORNERS[i].map((v, k) => Math.abs(v - CORNERS[j][k])).reduce((a, b) => a + b);
+  if (d === 1) EDGES.push([i, j]);
+}
+const faceNormal = (a, b) => {          // 一条棱挨着的两个面的法向
+  const out = [];
+  for (let k = 0; k < 3; k++) {
+    if (a[k] !== b[k]) continue;
+    const n = [0, 0, 0]; n[k] = a[k] === 1 ? 1 : -1; out.push(n);
+  }
+  return out;
+};
+const FACES = [
+  { n: [1, 0, 0], c: [[1,0,0],[1,1,0],[1,1,1],[1,0,1]] },
+  { n: [0, 1, 0], c: [[0,1,0],[1,1,0],[1,1,1],[0,1,1]] },
+  { n: [0, 0, 1], c: [[0,0,1],[1,0,1],[1,1,1],[0,1,1]] },
+];
+
+function section(t) {                    // 平面 x+y+z=t 与十二条棱的交点
+  const pts = [];
+  for (const [i, j] of EDGES) {
+    const A = CORNERS[i], B = CORNERS[j];
+    const sa = A[0] + A[1] + A[2] - t, sb = B[0] + B[1] + B[2] - t;
+    if (sa * sb > 0) continue;
+    const u = sa / (sa - sb);
+    const p = A.map((v, k) => v + u * (B[k] - v));
+    // 刀面正好扫过一个顶点时，两条棱会交出同一个点，去掉重复的
+    if (!pts.some(q => Math.hypot(q[0] - p[0], q[1] - p[1], q[2] - p[2]) < 1e-6)) pts.push(p);
+  }
+  if (pts.length < 3) return pts;
+  const c = [0, 1, 2].map(k => pts.reduce((s, p) => s + p[k], 0) / pts.length);
+  const e1 = nrm(sub(pts[0], c)), e2 = crs(nrm([1, 1, 1]), e1);
+  return pts.sort((p, q) => {
+    const f = x => Math.atan2(dot(sub(x, c), e2), dot(sub(x, c), e1));
+    return f(p) - f(q);
+  });
+}
+
+const cubeSvg = svg(CW, CH);
+document.getElementById("cubeWrap").append(cubeSvg);
+
+function drawCube(t) {
+  cubeSvg.textContent = "";
+  for (const f of FACES) {                                  // 迎着看的三个面，浅浅铺一层
+    const d = f.c.map(prj).map(p => p.join(",")).join(" ");
+    cubeSvg.append(el("polygon", { points: d, fill: "var(--pencil)", "fill-opacity": ".10", stroke: "none" }));
+  }
+  for (const [i, j] of EDGES) {
+    const A = CORNERS[i], B = CORNERS[j];
+    const hidden = faceNormal(A, B).every(n => dot(n, CAM) <= 0);
+    const [p, q] = [prj(A), prj(B)];
+    cubeSvg.append(el("line", {
+      x1: p[0], y1: p[1], x2: q[0], y2: q[1],
+      stroke: "var(--ink-3)", "stroke-width": hidden ? 1 : 1.8,
+      "stroke-dasharray": hidden ? "5 5" : "none", "stroke-linecap": "round"
+    }));
+  }
+  const pts = section(t);
+  if (pts.length >= 3) {
+    cubeSvg.append(el("polygon", {
+      points: pts.map(prj).map(p => p.join(",")).join(" "),
+      fill: "var(--cut-fill)", stroke: "var(--cut)", "stroke-width": 2.4, "stroke-linejoin": "round"
+    }));
+    const mid = Math.abs(t - 1.5) < 0.03;
+    for (const p of pts) {
+      const [x, y] = prj(p);
+      cubeSvg.append(el("circle", {
+        cx: x, cy: y, r: mid ? 4.6 : 3,
+        fill: mid ? "var(--cut)" : "var(--card)", stroke: "var(--cut)", "stroke-width": 1.8
+      }));
+    }
+  }
+  return pts.length;
+}
+
+const NAMES = { 3: "三角形", 4: "四边形", 5: "五边形", 6: "六边形" };
+const slider = document.getElementById("tSlider");
+const shapeName = document.getElementById("shapeName");
+const hint = document.getElementById("hint");
+function update() {
+  const t = +slider.value;
+  const n = drawCube(t);
+  const mid = Math.abs(t - 1.5) < 0.03;
+  shapeName.textContent = mid ? "正六边形" : (NAMES[n] || "—");
+  hint.innerHTML = mid
+    ? "六个顶点正好落在<b>六条棱的中点</b>上。"
+    : "六个角还没对齐——<b>只有正中间那一刀</b>才是正的。";
+}
+slider.addEventListener("input", update);
+update();
+
+/* ---------- 2. 三条规则的小图 ---------- */
+const MID = { T: [.5, 0], B: [.5, 1], L: [0, .5], R: [1, .5] };
+function cell(parent, x, y, s, cuts, opt = {}) {
+  parent.append(el("rect", {
+    x, y, width: s, height: s, fill: opt.fill || "none",
+    stroke: "var(--ink)", "stroke-width": 1.8
+  }));
+  for (const c of cuts) {
+    const [a, b] = [MID[c.a], MID[c.b]];
+    parent.append(el("line", {
+      x1: x + a[0] * s, y1: y + a[1] * s, x2: x + b[0] * s, y2: y + b[1] * s,
+      stroke: c.color || "var(--cut)", "stroke-width": c.w || 2.6, "stroke-linecap": "round",
+      "stroke-dasharray": c.dash || "none"
+    }));
+  }
+}
+function dotAt(parent, x, y, color) {
+  parent.append(el("circle", { cx: x, cy: y, r: 3.4, fill: color, stroke: "var(--card)", "stroke-width": 1.4 }));
+}
+function mark(parent, x, y, ok) {
+  const g = el("g", { stroke: ok ? "var(--ok)" : "var(--no)", "stroke-width": 3, fill: "none", "stroke-linecap": "round" });
+  if (ok) g.append(el("path", { d: `M${x - 7} ${y} l5 6 l10 -13` }));
+  else { g.append(el("path", { d: `M${x - 6} ${y - 6} l12 12` })); g.append(el("path", { d: `M${x + 6} ${y - 6} l-12 12` })); }
+  parent.append(g);
+}
+
+// Rule 1：切角 vs 整格对角线
+(() => {
+  const s = svg(260, 118), S = 82;
+  cell(s, 26, 18, S, [{ a: "L", b: "B" }]);
+  dotAt(s, 26, 18 + S / 2, "var(--cut)"); dotAt(s, 26 + S / 2, 18 + S, "var(--cut)");
+  mark(s, 26 + S + 18, 18 + S / 2, true);
+  cell(s, 152, 18, S, []);
+  s.append(el("line", { x1: 152, y1: 18, x2: 152 + S, y2: 18 + S, stroke: "var(--no)", "stroke-width": 2.6, "stroke-linecap": "round" }));
+  mark(s, 152 + S + 16, 18 + S / 2, false);
+  document.getElementById("ruleA").append(s);
+})();
+
+// Rule 2：直着穿过去 vs 拐回来
+(() => {
+  const s = svg(260, 118), S = 54;
+  cell(s, 22, 20, S, [{ a: "T", b: "R" }]); cell(s, 22 + S, 20, S, [{ a: "L", b: "B" }]);
+  dotAt(s, 22 + S, 20 + S / 2, "var(--cut)");
+  mark(s, 22 + 2 * S + 16, 20 + S / 2, true);
+  cell(s, 152, 20, S, [{ a: "T", b: "R" }]);
+  cell(s, 152 + S, 20, S, [{ a: "L", b: "T", color: "var(--no)" }]);
+  dotAt(s, 152 + S, 20 + S / 2, "var(--no)");
+  mark(s, 152 + 2 * S + 12, 20 + S / 2, false);
+  document.getElementById("ruleB").append(s);
+})();
+
+// Rule 3：一边碰一边不碰
+(() => {
+  const s = svg(260, 118), S = 54;
+  cell(s, 22, 20, S, [{ a: "L", b: "B" }]); cell(s, 22 + S, 20, S, [{ a: "B", b: "R" }]);
+  mark(s, 22 + 2 * S + 16, 20 + S / 2, true);
+  cell(s, 152, 20, S, [{ a: "T", b: "R", color: "var(--no)" }]); cell(s, 152 + S, 20, S, [{ a: "B", b: "R" }]);
+  dotAt(s, 152 + S, 20 + S / 2, "var(--no)");
+  mark(s, 152 + 2 * S + 12, 20 + S / 2, false);
+  document.getElementById("ruleC").append(s);
+})();
+
+/* ---------- 3. 四张展开图 ---------- */
+// 答案是 base64 的 —— 源码里不留明文，免得直接抄。
+// 要改的话先解开：python3 -c "import base64;print(base64.b64decode('...').decode())"
+const NETS = [
+  { id: "①", cells: [[0,0],[0,1],[0,2],[1,2],[1,3],[1,4]],
+    cuts: { "0,0": ["L","B"], "0,1": ["B","R"], "0,2": ["L","T"], "1,2": ["L","B"], "1,3": ["B","R"], "1,4": ["L","T"] },
+    k: "eyJvayI6IHRydWUsICJiYWQiOiBudWxsLCAid2h5IjogIuWFremBk+eXleS4pOS4pOaIkOWvueOAgeaKmOe8neWkhOivpeebtOeahOmDveebtOOAguaKmOi1t+adpTxiPuS4peS4neWQiOe8nTwvYj7jgIIifQ==" },
+  { id: "②", cells: [[0,0],[0,1],[1,1],[1,2],[1,3],[2,3]],
+    cuts: { "0,0": ["L","B"], "0,1": ["B","R"], "1,1": ["L","T"], "1,2": ["T","R"], "1,3": ["L","B"], "2,3": ["L","T"] },
+    k: "eyJvayI6IGZhbHNlLCAiYmFkIjogIjIsMyIsICJ3aHkiOiAi5pyA5ZCO5LiA5qC8PGI+5Zyo5oqY57yd5aSE5ouQ5LqG5Zue5Y67PC9iPu+8jOayoeacieebtOedgOepv+i/h+OAguaKmOi1t+adpeWPqui/nuWIsCA1IOS4quinku+8jOesrOWFreS4quiQveepuuOAgiJ9" },
+  { id: "③", cells: [[0,0],[0,1],[1,1],[1,2],[2,2],[2,3]],
+    cuts: { "0,0": ["T","R"], "0,1": ["L","B"], "1,1": ["T","R"], "1,2": ["L","B"], "2,2": ["T","R"], "2,3": ["L","B"] },
+    k: "eyJvayI6IHRydWUsICJiYWQiOiBudWxsLCAid2h5IjogIuacgOWlveiupOeahOS4gOW8oO+8muWFremBk+eXlei/nuaIkDxiPuS4gOadoeeslOebtOeahOmVv+e6vzwvYj7vvIzku47lpLTotK/liLDlsL7jgIIifQ==" },
+  { id: "④", cells: [[0,1],[1,0],[1,1],[1,2],[1,3],[2,2]],
+    cuts: { "0,1": ["L","B"], "1,0": ["T","L"], "1,1": ["T","R"], "1,2": ["L","B"], "1,3": ["R","B"], "2,2": ["T","R"] },
+    k: "eyJvayI6IHRydWUsICJiYWQiOiBudWxsLCAid2h5IjogIuaOkuW4g+aNouS6hu+8jOinhOWImeeFp+agt+a7oei2s+OAgueci+edgOaVo++8jOaKmOi1t+adpTxiPuS5n+aYr+WQjOS4gOS4quato+WFrei+ueW9ojwvYj7jgIIifQ==" },
+];
+const FIN = "eyJiaWciOiAi4pGgIOKRoiDikaMiLCAid2h5IjogIui/meS4ieW8oOaKmOi1t+adpemDveiDveWbtOaIkOWQjOS4gOS4quato+WFrei+ueW9ouOAguKRoSDlj6rplJnlnKjmnIDlkI7pgqPkuIDlsI/mrrXigJTigJTlroPlnKjmipjnvJ3lpITmi5Dkuoblm57ljrvvvIzkuo7mmK/nrKzlha3kuKrop5LokL3kuobnqbrjgIIifQ==";
+const dec = b => JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(b), c => c.charCodeAt(0))));
+
+function drawNet(spec, badKey) {
+  const S = 56, P = 16;
+  const cs = spec.cells.map(c => c[1]), rs = spec.cells.map(c => c[0]);
+  const c0 = Math.min(...cs), r0 = Math.min(...rs);
+  const w = (Math.max(...cs) - c0 + 1) * S + P * 2, h = (Math.max(...rs) - r0 + 1) * S + P * 2;
+  const s = svg(w, h);
+  for (const [r, c] of spec.cells) {
+    const key = r + "," + c, cut = spec.cuts[key];
+    const isBad = badKey === key;
+    cell(s, P + (c - c0) * S, P + (r - r0) * S, S,
+      [{ a: cut[0], b: cut[1], color: isBad ? "var(--no)" : "var(--cut)", w: isBad ? 3.2 : 2.6 }]);
+  }
+  if (badKey) {
+    const [r, c] = badKey.split(",").map(Number);
+    s.append(el("circle", {
+      cx: P + (c - c0) * S + S / 2, cy: P + (r - r0) * S + S / 2, r: S * 0.56,
+      fill: "none", stroke: "var(--no)", "stroke-width": 2, "stroke-dasharray": "6 5", opacity: ".8"
+    }));
+  }
+  return s;
+}
+
+const grid = document.getElementById("netGrid");
+const bar = document.getElementById("revealBar");
+const barMsg = document.getElementById("barMsg");
+const finish = document.getElementById("finish");
+const cards = [];
+let done = 0, hit = 0;
+
+for (const spec of NETS) {
+  const card = document.createElement("div");
+  card.className = "net";
+
+  const head = document.createElement("header");
+  head.innerHTML = `<span class="id">${spec.id}</span><span class="verdict" hidden></span>`;
+
+  const art = document.createElement("div");
+  art.className = "art";
+  art.append(drawNet(spec, null));           // 没判之前什么都不标
+
+  const choice = document.createElement("div");
+  choice.className = "choice";
+  choice.innerHTML = '<span class="ask">你判：</span>' +
+    '<button type="button" data-v="1">画对了</button>' +
+    '<button type="button" data-v="0">画错了</button>';
+
+  const why = document.createElement("p");    // 解释锁着，判了才解码填进去
+  why.className = "why";
+  why.hidden = true;
+
+  card.append(head, art, choice, why);
+  grid.append(card);
+
+  const rec = { spec, card, head, art, choice, why, pick: null };
+  choice.addEventListener("click", e => {
+    const b = e.target.closest("button");
+    if (!b || rec.pick !== null) return;      // 一张只判一次
+    rec.pick = b.dataset.v === "1";
+    settle(rec);
+  });
+  cards.push(rec);
+}
+
+function settle(rec) {
+  const { spec, card, head, art, why, choice } = rec;
+  const ans = dec(spec.k);                    // 到这一步才解开答案
+  const right = rec.pick === ans.ok;
+
+  card.classList.add(ans.ok ? "good" : "bad");
+  const v = head.querySelector(".verdict");
+  v.textContent = ans.ok ? "对" : "错";
+  v.hidden = false;
+  art.replaceChildren(drawNet(spec, ans.bad));
+  why.innerHTML = ans.why;
+  why.hidden = false;
+
+  const p = document.createElement("p");
+  p.className = "picked " + (right ? "hit" : "miss");
+  p.textContent = right ? "✓ 判对了" : "✗ 判错了";
+  choice.replaceWith(p);
+
+  done++; if (right) hit++;
+  barMsg.innerHTML = done === 4 ? "四张都判完了" : `还剩 <b>${4 - done}</b> 张没判`;
+  if (done === 4) {
+    const f = dec(FIN);
+    document.getElementById("bigAns").textContent = f.big;
+    document.getElementById("finWhy").textContent = f.why;
+    document.getElementById("score").textContent = `四张你判对了 ${hit} 张。`;
+    bar.hidden = true;
+    finish.hidden = false;
+  }
+}
+</script>
+</body>
+</html>

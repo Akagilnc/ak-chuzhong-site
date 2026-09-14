@@ -1,0 +1,4 @@
+# wrangler 的本地缓存，不进版本库
+.wrangler/
+node_modules/
+.DS_Store

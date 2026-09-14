@@ -1,0 +1,5 @@
+# 站小、改得勤，不要让浏览器拿着旧文件不放。
+# 带 ETag 重新验证，没变就是 304，几乎不花流量；
+# 少了这条，改过的 base.css 会被缓存住 —— 本来该藏起来的答案会露出来。
+/*
+  Cache-Control: public, max-age=0, must-revalidate

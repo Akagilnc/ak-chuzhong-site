@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>初中图解</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Serif:wght@500;600&display=swap">
+<link rel="stylesheet" href="base.css?v=2">
+<style>
+.toc{list-style:none; margin:0; padding:0; display:flex; flex-direction:column}
+.toc li{border-top:1px solid var(--edge)}
+.toc li:last-child{border-bottom:1px solid var(--edge)}
+.toc a{
+  display:grid; grid-template-columns:auto 1fr auto; align-items:baseline; gap:14px;
+  padding:18px 10px; text-decoration:none; color:var(--ink);
+  transition:background .12s ease, padding-left .12s ease;
+}
+.toc a:hover, .toc a:focus-visible{background:var(--card); padding-left:16px}
+.num{font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:13px; font-weight:600;
+  color:var(--cut); letter-spacing:.1em; font-variant-numeric:tabular-nums}
+.t{font-size:clamp(17px,2.6vw,20px); font-weight:600; line-height:1.4;
+  position:relative; overflow:hidden; white-space:nowrap; text-overflow:ellipsis}
+.tag{font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:11.5px;
+  letter-spacing:.16em; color:var(--ink-3); white-space:nowrap}
+.desc{grid-column:2 / -1; margin:0; font-size:14px; color:var(--ink-2); line-height:1.6;
+  white-space:normal}
+@media (max-width:560px){
+  .toc a{grid-template-columns:auto 1fr; row-gap:6px}
+  .tag{grid-column:2; justify-self:start}
+  .desc{grid-column:2}
+}
+.note{margin:0; font-size:14px; color:var(--ink-3); max-width:34em}
+</style>
+</head>
+<body>
+<main>
+  <header class="head">
+    <p class="eyebrow">akbot · 初中</p>
+    <h1>初中图解</h1>
+    <p class="lede">一道题一页。能拖、能点、能自己试，看明白为止——不是把答案抄给你。</p>
+  </header>
+
+  <section>
+    <ul class="toc">
+      <li>
+        <a href="cube/">
+          <span class="num">01</span>
+          <span class="t">正方体怎么切出一个正六边形</span>
+          <span class="tag">几何 · 展开图</span>
+          <p class="desc">拖滑块看刀面扫过整个正方体，再用三条规则去判展开图上的切割线画得对不对。</p>
+        </a>
+      </li>
+    </ul>
+  </section>
+
+  <section>
+    <p class="note">会一道一道往上加。手机上也能看。</p>
+  </section>
+</main>
+</body>
+</html>
