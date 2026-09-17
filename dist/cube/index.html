@@ -4,96 +4,43 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>正方体切正六边形</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Serif:wght@500;600&display=swap">
-<link rel="stylesheet" href="../base.css?v=2">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=ZCOOL+KuaiLe&display=swap" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="../base.css?v=3">
 <style>
 /* 这条必须留在页面自己的 style 里，不能只写在 base.css：
-   外链 CSS 会被浏览器缓存（zone 规则 max-age=14400，改不了），
-   拿到旧文件时 .finish 的 display:flex 就会顶掉 hidden 属性 —— 答案直接露出来。
+   外链 CSS 会被浏览器缓存，拿到旧文件时 .finish 的 display:flex 就会顶掉 hidden 属性 —— 答案直接露出来。
    样式旧一点无所谓，答案露出来不行。 */
 [hidden]{display:none !important}
 
 /* 切面演示 */
-.demo{display:grid; grid-template-columns:minmax(0,1.15fr) minmax(0,.85fr); gap:clamp(18px,3vw,34px); align-items:center}
+.demo{display:grid; grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr); gap:clamp(18px,3vw,34px); align-items:center;
+  background:linear-gradient(180deg, var(--sky-soft), transparent 62%), var(--card)}
 @media (max-width:680px){.demo{grid-template-columns:1fr}}
 .demo svg{width:100%; height:auto; display:block}
-.readout{display:flex; flex-direction:column; gap:14px}
-.shape{
-  font-family:"IBM Plex Serif",Georgia,serif; font-size:clamp(26px,4.4vw,36px);
-  font-weight:600; color:var(--cut); line-height:1.2;
-}
-.shape em{display:block; font-style:normal; font-family:"IBM Plex Mono",ui-monospace,monospace;
-  font-size:12px; letter-spacing:.18em; color:var(--ink-3); font-weight:500; margin-bottom:6px}
-input[type=range]{width:100%; accent-color:var(--cut); margin:0}
-.scale{display:flex; justify-content:space-between; font-family:"IBM Plex Mono",ui-monospace,monospace;
-  font-size:11px; color:var(--ink-3); letter-spacing:.06em}
-.hint{margin:0; font-size:14px; color:var(--ink-2)}
-.hint b{color:var(--ink); font-weight:600}
-
-/* 三条规则 */
-.rules{display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:16px}
-.rule{background:var(--card); border:1px solid var(--edge); border-radius:3px; padding:20px;
-  display:flex; flex-direction:column; gap:12px; box-shadow:var(--shadow)}
-.rule svg{width:100%; height:auto; display:block}
-.rule h3{margin:0; font-size:17px; font-weight:650; line-height:1.45; text-wrap:balance}
-.rule p{margin:0; font-size:14px; color:var(--ink-2); line-height:1.7}
-.rule .tag{font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:11px;
-  letter-spacing:.2em; color:var(--ink-3); text-transform:uppercase}
+.readout{display:flex; flex-direction:column; gap:16px}
+.shape{font-family:var(--f-title); font-size:clamp(30px,5vw,42px); line-height:1.2; color:var(--cut)}
+.shape em{display:block; font-style:normal; font-family:var(--f-body); font-size:13.5px; font-weight:700; color:var(--ink-3); margin-bottom:4px}
+.scale{display:flex; justify-content:space-between; margin-top:6px; font-size:12.5px; font-weight:700; color:var(--ink-3)}
 
 /* 四张展开图 */
-.nets{display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:16px}
-.net{background:var(--card); border:1px solid var(--edge); border-radius:3px; padding:18px 18px 20px;
-  display:flex; flex-direction:column; gap:12px; box-shadow:var(--shadow); position:relative}
-.net.good{border-color:color-mix(in srgb, var(--ok) 45%, var(--edge))}
-.net.bad{border-color:color-mix(in srgb, var(--no) 55%, var(--edge))}
-.net header{display:flex; align-items:center; justify-content:space-between; gap:12px}
-.net .id{font-family:"IBM Plex Serif",Georgia,serif; font-size:26px; font-weight:600; line-height:1}
-.verdict{font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:12px; font-weight:600;
-  letter-spacing:.14em; padding:.3em .8em; border-radius:999px}
-.good .verdict{color:var(--ok); background:var(--ok-soft)}
-.bad .verdict{color:var(--no); background:var(--no-soft)}
-.net .art{overflow-x:auto}
+.net .art{overflow-x:auto; background:var(--paper); border-radius:14px; padding:6px}
 .net svg{display:block; margin:0 auto; width:100%; max-width:330px; height:auto}
-.why{margin:0; font-size:14px; line-height:1.7; color:var(--ink-2)}
-.why b{color:var(--ink); font-weight:600}
 .bad .why b{color:var(--no)}
-
-.finish{
-  display:flex; flex-wrap:wrap; align-items:center; gap:clamp(14px,3vw,30px);
-  border-top:2px solid var(--ink); padding-top:22px;
-}
-.finish .big{
-  font-family:"IBM Plex Serif",Georgia,serif; font-size:clamp(40px,9vw,72px); font-weight:600;
-  line-height:1; letter-spacing:.02em; color:var(--ok);
-}
-.finish p{margin:0; color:var(--ink-2); font-size:15px; max-width:30em}
-
-/* 自己判 → 对答案 */
-.choice{display:flex; flex-wrap:wrap; align-items:center; gap:8px; margin-top:2px}
-.choice .ask{font-size:13px; color:var(--ink-3); margin-right:2px}
-.choice button{
-  font:inherit; font-size:13.5px; font-weight:600; color:var(--ink-2);
-  background:transparent; border:1.5px solid var(--edge); border-radius:999px;
-  padding:.34em 1.05em; cursor:pointer; transition:border-color .12s, color .12s, background .12s;
-}
-.choice button:hover{border-color:var(--cut); color:var(--cut)}
-.choice button[aria-pressed="true"]{border-color:var(--cut); color:var(--cut); background:var(--cut-fill)}
-.picked{margin:2px 0 0; font-size:13.5px; font-weight:600}
-.picked.hit{color:var(--ok)}
-.picked.miss{color:var(--no)}
-.score{margin:0; font-size:15px; font-weight:600; color:var(--ink)}
-.reveal-bar{display:flex; flex-wrap:wrap; align-items:center; gap:14px; margin-top:18px}
-.reveal-bar p{margin:0; font-size:14px; color:var(--ink-3); font-variant-numeric:tabular-nums}
-.reveal-bar p b{color:var(--ink); font-weight:600}
+.finish .fin-pal{align-self:center}
 </style>
 </head>
 <body>
 <main>
   <header class="head">
-    <p class="back"><a href="../">← 初中图解</a></p>
-    <p class="eyebrow">初中几何 · 正方体展开图</p>
-    <h1>把正方体切出一个正六边形</h1>
-    <p class="lede">题目问：①②③④ 四张展开图里，切割线画对的是哪几个？先把下面三条规则弄懂，然后一张一张自己判。判完当场就知道对不对。</p>
+    <p class="back"><a href="../">← 回到初中图解</a></p>
+    <p class="eyebrow">📐 初中几何 · 正方体展开图</p>
+    <h1>把正方体切出一个<span class="hl">正六边形</span></h1>
+    <div class="problem">
+      <span class="problem-tag">📝 题目</span>
+      <p>①②③④ 四张展开图里，切割线画对的是哪几个？先把下面三条规则弄懂，然后一张一张自己判。判完当场就知道对不对。</p>
+    </div>
   </header>
 
   <section>
@@ -102,34 +49,34 @@ input[type=range]{width:100%; accent-color:var(--cut); margin:0}
     <div class="slab demo">
       <div id="cubeWrap"></div>
       <div class="readout">
-        <div class="shape"><em>切面形状</em><span id="shapeName">正六边形</span></div>
+        <div class="shape"><em>切出来的形状</em><span id="shapeName">正六边形</span></div>
         <div>
           <input type="range" id="tSlider" min="0.06" max="2.94" step="0.02" value="1.5" aria-label="刀面位置">
-          <div class="scale"><span>贴着一个角</span><span>正中间</span><span>贴着对角</span></div>
+          <div class="scale" aria-hidden="true"><span>贴着一个角</span><span>正中间</span><span>贴着对角</span></div>
         </div>
-        <p class="hint" id="hint">六个顶点正好落在<b>六条棱的中点</b>上。</p>
+        <div class="talk"><span class="mascot" id="cubePal"></span><p class="bubble" id="hint" aria-live="polite"></p></div>
       </div>
     </div>
   </section>
 
   <section>
-    <h2><span class="n">02</span>三条规则</h2>
-    <p class="sub">这一刀在每个面上都留下一道痕。把正方体摊平，这六道痕必须同时满足下面三条。</p>
+    <h2><span class="n sky">02</span>三条规则</h2>
+    <p class="sub">这一刀在每个面上都留下一道痕。把正方体摊平，这六道痕必须<b>同时</b>满足下面三条。</p>
     <div class="rules">
-      <div class="rule">
-        <span class="tag">Rule 1</span>
+      <div class="rule sky">
+        <span class="tag">规则 1</span>
         <div id="ruleA"></div>
         <h3>每格只是「切掉一个角」</h3>
         <p>那道痕连的是<b>相邻两条边的中点</b>，斜着跨半格。<strong>不是整格的大对角线</strong>。</p>
       </div>
-      <div class="rule">
-        <span class="tag">Rule 2</span>
+      <div class="rule grape">
+        <span class="tag">规则 2</span>
         <div id="ruleB"></div>
         <h3>过折缝要「直着穿过去」</h3>
         <p>两格之间若有痕相接，接点必在折缝中点，且摊平后两段<b>连成一条直线</b>。拐回去就接不上。</p>
       </div>
-      <div class="rule">
-        <span class="tag">Rule 3</span>
+      <div class="rule pink">
+        <span class="tag">规则 3</span>
         <div id="ruleC"></div>
         <h3>要么都碰，要么都不碰</h3>
         <p>一条折缝上，两边的痕<b>同时碰</b>或<b>同时躲开</b>。一边碰一边不碰，折起来就断了。</p>
@@ -138,22 +85,31 @@ input[type=range]{width:100%; accent-color:var(--cut); margin:0}
   </section>
 
   <section>
-    <h2><span class="n">03</span>逐个验</h2>
+    <h2><span class="n grape">03</span>轮到你判啦</h2>
     <p class="sub">按上面三条查。<b>每张自己先给个判断</b>——点下去才会告诉你对不对，以及错在哪一笔。</p>
-    <div class="nets" id="netGrid"></div>
+    <div class="q-grid" id="netGrid"></div>
     <div class="reveal-bar" id="revealBar">
+      <span class="mascot" id="helper"></span>
       <p id="barMsg">还剩 <b>4</b> 张没判</p>
     </div>
   </section>
 
   <section class="finish" id="finish" hidden>
+    <span class="mascot bob fin-pal" id="finPal"></span>
     <div class="big" id="bigAns"></div>
-    <p class="score" id="score"></p>
-    <p id="finWhy"></p>
+    <div class="fin-side">
+      <div class="stars" id="stars" aria-hidden="true"></div>
+      <p class="score" id="score"></p>
+      <p class="cheer" id="cheer"></p>
+      <p class="fin-why" id="finWhy"></p>
+      <div class="pills"><button type="button" class="go" id="retry">再判一遍 ↺</button></div>
+    </div>
   </section>
 </main>
 
+<script src="../kit.js?v=1"></script>
 <script>
+
 const NS = "http://www.w3.org/2000/svg";
 const el = (n, a = {}) => { const e = document.createElementNS(NS, n); for (const k in a) e.setAttribute(k, a[k]); return e; };
 const svg = (w, h) => el("svg", { viewBox: `0 0 ${w} ${h}`, xmlns: NS });
@@ -252,14 +208,20 @@ const NAMES = { 3: "三角形", 4: "四边形", 5: "五边形", 6: "六边形" }
 const slider = document.getElementById("tSlider");
 const shapeName = document.getElementById("shapeName");
 const hint = document.getElementById("hint");
+let palMood = "";
 function update() {
   const t = +slider.value;
   const n = drawCube(t);
   const mid = Math.abs(t - 1.5) < 0.03;
-  shapeName.textContent = mid ? "正六边形" : (NAMES[n] || "—");
+  shapeName.textContent = mid ? "正六边形 ✨" : (NAMES[n] || "—");
   hint.innerHTML = mid
-    ? "六个顶点正好落在<b>六条棱的中点</b>上。"
-    : "六个角还没对齐——<b>只有正中间那一刀</b>才是正的。";
+    ? "<b>哇，就是这一刀！</b>六个顶点正好落在<b>六条棱的中点</b>上。"
+    : "嗯……六个角还没对齐。<b>只有正中间那一刀</b>才是正的，再拖拖看？";
+  const mood = mid ? "wow" : "hmm";
+  if (mood !== palMood) {
+    document.getElementById("cubePal").replaceChildren(Kit.mascot({ color: "var(--sky)", mood, look: 1, size: 58 }));
+    palMood = mood;
+  }
 }
 slider.addEventListener("input", update);
 update();
@@ -326,9 +288,8 @@ function mark(parent, x, y, ok) {
   document.getElementById("ruleC").append(s);
 })();
 
-/* ---------- 3. 四张展开图 ---------- */
-// 答案是 base64 的 —— 源码里不留明文，免得直接抄。
-// 要改的话先解开：python3 -c "import base64;print(base64.b64decode('...').decode())"
+/* ---------- 3. 轮到你判啦 ---------- */
+// 答案是 base64 的 —— 源码里不留明文，免得直接抄。解法见 kit.js 的 Kit.dec。
 const NETS = [
   { id: "①", cells: [[0,0],[0,1],[0,2],[1,2],[1,3],[1,4]],
     cuts: { "0,0": ["L","B"], "0,1": ["B","R"], "0,2": ["L","T"], "1,2": ["L","B"], "1,3": ["B","R"], "1,4": ["L","T"] },
@@ -344,7 +305,6 @@ const NETS = [
     k: "eyJvayI6IHRydWUsICJiYWQiOiBudWxsLCAid2h5IjogIuaOkuW4g+aNouS6hu+8jOinhOWImeeFp+agt+a7oei2s+OAgueci+edgOaVo++8jOaKmOi1t+adpTxiPuS5n+aYr+WQjOS4gOS4quato+WFrei+ueW9ojwvYj7jgIIifQ==" },
 ];
 const FIN = "eyJiaWciOiAi4pGgIOKRoiDikaMiLCAid2h5IjogIui/meS4ieW8oOaKmOi1t+adpemDveiDveWbtOaIkOWQjOS4gOS4quato+WFrei+ueW9ouOAguKRoSDlj6rplJnlnKjmnIDlkI7pgqPkuIDlsI/mrrXigJTigJTlroPlnKjmipjnvJ3lpITmi5Dkuoblm57ljrvvvIzkuo7mmK/nrKzlha3kuKrop5LokL3kuobnqbrjgIIifQ==";
-const dec = b => JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(b), c => c.charCodeAt(0))));
 
 function drawNet(spec, badKey) {
   const S = 56, P = 16;
@@ -368,55 +328,73 @@ function drawNet(spec, badKey) {
   return s;
 }
 
+const CHEER = [
+  "没关系，这题本来就爱挖坑。把红圈那几张的解释读一遍，再判一次 🌱",
+  "没关系，这题本来就爱挖坑。把红圈那几张的解释读一遍，再判一次 🌱",
+  "判对一半！对着三条规则再看看判错的那几张 ✍️",
+  "只差一张～看看那张错在哪一笔就稳了 💪",
+  "全对！三条规则你已经用熟了 🎉",
+];
 const grid = document.getElementById("netGrid");
 const bar = document.getElementById("revealBar");
 const barMsg = document.getElementById("barMsg");
 const finish = document.getElementById("finish");
-const cards = [];
+const helper = mood => document.getElementById("helper").replaceChildren(Kit.mascot({ color: "var(--grape)", mood, size: 50 }));
 let done = 0, hit = 0;
 
-for (const spec of NETS) {
-  const card = document.createElement("div");
-  card.className = "net";
+function buildNets() {
+  grid.replaceChildren();
+  done = 0; hit = 0;
+  barMsg.innerHTML = `还剩 <b>${NETS.length}</b> 张没判`;
+  bar.hidden = false;
+  finish.hidden = true;
+  // 重判时把上一轮解开的终答一起清掉 —— 光藏起来不够，文字还留在页面里
+  for (const id of ["bigAns", "finWhy", "score", "cheer", "stars"]) document.getElementById(id).textContent = "";
+  helper("happy");
 
-  const head = document.createElement("header");
-  head.innerHTML = `<span class="id">${spec.id}</span><span class="verdict" hidden></span>`;
+  for (const spec of NETS) {
+    const card = document.createElement("div");
+    card.className = "q-card net";
 
-  const art = document.createElement("div");
-  art.className = "art";
-  art.append(drawNet(spec, null));           // 没判之前什么都不标
+    const head = document.createElement("header");
+    head.innerHTML = `<span class="id">${spec.id}</span><span class="verdict" hidden></span>`;
 
-  const choice = document.createElement("div");
-  choice.className = "choice";
-  choice.innerHTML = '<span class="ask">你判：</span>' +
-    '<button type="button" data-v="1">画对了</button>' +
-    '<button type="button" data-v="0">画错了</button>';
+    const art = document.createElement("div");
+    art.className = "art";
+    art.append(drawNet(spec, null));             // 没判之前什么都不标
 
-  const why = document.createElement("p");    // 解释锁着，判了才解码填进去
-  why.className = "why";
-  why.hidden = true;
+    const choice = document.createElement("div");
+    choice.className = "choice";
+    choice.innerHTML = '<span class="ask">你判：</span>' +
+      '<button type="button" data-v="1">画对了 👍</button>' +
+      '<button type="button" data-v="0">画错了 👎</button>';
 
-  card.append(head, art, choice, why);
-  grid.append(card);
+    const why = document.createElement("p");      // 解释锁着，判了才解码填进去
+    why.className = "why";
+    why.hidden = true;
 
-  const rec = { spec, card, head, art, choice, why, pick: null };
-  choice.addEventListener("click", e => {
-    const b = e.target.closest("button");
-    if (!b || rec.pick !== null) return;      // 一张只判一次
-    rec.pick = b.dataset.v === "1";
-    settle(rec);
-  });
-  cards.push(rec);
+    card.append(head, art, choice, why);
+    grid.append(card);
+
+    const rec = { spec, card, head, art, choice, why, pick: null };
+    choice.addEventListener("click", e => {
+      const b = e.target.closest("button");
+      if (!b || rec.pick !== null) return;        // 一张只判一次
+      rec.pick = b.dataset.v === "1";
+      settle(rec);
+    });
+  }
 }
 
 function settle(rec) {
   const { spec, card, head, art, why, choice } = rec;
-  const ans = dec(spec.k);                    // 到这一步才解开答案
+  const ans = Kit.dec(spec.k);                    // 到这一步才解开答案
   const right = rec.pick === ans.ok;
 
-  card.classList.add(ans.ok ? "good" : "bad");
+  // good/bad 说的是这张图画得对不对；hit/miss 说的是你判得对不对 —— 两件事分开
+  card.classList.add(ans.ok ? "good" : "bad", right ? "hit" : "miss");
   const v = head.querySelector(".verdict");
-  v.textContent = ans.ok ? "对" : "错";
+  v.textContent = ans.ok ? "画对了" : "画错了";
   v.hidden = false;
   art.replaceChildren(drawNet(spec, ans.bad));
   why.innerHTML = ans.why;
@@ -424,20 +402,34 @@ function settle(rec) {
 
   const p = document.createElement("p");
   p.className = "picked " + (right ? "hit" : "miss");
-  p.textContent = right ? "✓ 判对了" : "✗ 判错了";
+  p.textContent = right ? "你判对啦 🎉" : "判错了～看看下面是哪一笔";
   choice.replaceWith(p);
+  if (right) Kit.burst(p);
+  helper(right ? "wow" : "hmm");
 
   done++; if (right) hit++;
-  barMsg.innerHTML = done === 4 ? "四张都判完了" : `还剩 <b>${4 - done}</b> 张没判`;
-  if (done === 4) {
-    const f = dec(FIN);
+  barMsg.innerHTML = done === NETS.length ? "四张都判完啦" : `还剩 <b>${NETS.length - done}</b> 张没判`;
+  if (done === NETS.length) {
+    const f = Kit.dec(FIN);
     document.getElementById("bigAns").textContent = f.big;
     document.getElementById("finWhy").textContent = f.why;
-    document.getElementById("score").textContent = `四张你判对了 ${hit} 张。`;
+    document.getElementById("score").textContent = `四张你判对了 ${hit} 张`;
+    document.getElementById("stars").innerHTML =
+      NETS.map((_, k) => `<span class="${k < hit ? "on" : "off"}">★</span>`).join("");
+    document.getElementById("cheer").textContent = CHEER[hit];
+    document.getElementById("finPal").replaceChildren(Kit.mascot({ color: "var(--sky)", mood: hit >= 2 ? "wow" : "hmm", size: 88 }));
     bar.hidden = true;
     finish.hidden = false;
+    finish.scrollIntoView({ behavior: Kit.reduceMotion ? "auto" : "smooth", block: "center" });
+    setTimeout(() => Kit.burst(document.getElementById("bigAns"), 36), Kit.reduceMotion ? 0 : 350);
   }
 }
+
+document.getElementById("retry").addEventListener("click", () => {
+  buildNets();
+  grid.scrollIntoView({ behavior: Kit.reduceMotion ? "auto" : "smooth", block: "start" });
+});
+buildNets();
 </script>
 </body>
 </html>
