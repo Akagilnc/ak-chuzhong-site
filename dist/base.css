@@ -1,78 +1,242 @@
-/* 全站共用：配色、纸张、基础排版。各页只写自己那部分。 */
+/* 全站共用：配色、底纹、字体，以及每页都会用到的可爱组件（按钮、卡片、结算、彩纸、小团子）。
+   各页只写自己那一页特有的部分。改过这个文件，把各页引用的 ?v=N 加一。 */
 :root{
   color-scheme:light dark;
-  --paper:#F6F7F3; --grid:#E2E8E0; --grid-bold:#D2DCD0;
-  --ink:#182430; --ink-2:#4C5C67; --ink-3:#8798A1;
-  --pencil:#A9B8BE;
-  --cut:#B9782A; --cut-fill:rgba(201,134,46,.20);
-  --ok:#2C7A57; --ok-soft:rgba(44,122,87,.10);
-  --no:#BE3A2B; --no-soft:rgba(190,58,43,.09);
-  --card:#FFFFFF; --edge:#DCE4DA;
-  --shadow:0 1px 0 rgba(24,36,48,.05), 0 10px 28px -18px rgba(24,36,48,.35);
+  --f-body:"Yuanti SC","YuanTi SC","HarmonyOS Sans SC","PingFang SC","MiSans","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC",system-ui,sans-serif;
+  --f-title:"ZCOOL KuaiLe",var(--f-body);
+  --f-num:"Fredoka","Baloo 2","Arial Rounded MT Bold",var(--f-body);
+
+  --paper:#FFF7EC; --dot-a:#FFE2C6; --dot-b:#D9F2E6;
+  --grid:#F3E6D6; --grid-bold:#EAD6BF;
+  --ink:#3A2B4D; --ink-2:#6E5C80; --ink-3:#A596B4;
+  --pencil:#D6C4B2;
+  --cut:#FF8A3D; --cut-fill:rgba(255,138,61,.18);
+  --ok:#1FAF6B; --ok-soft:rgba(31,175,107,.14);
+  --no:#F2536A; --no-soft:rgba(242,83,106,.13);
+  --sky:#3FA9F5; --sky-soft:rgba(63,169,245,.15);
+  --lemon:#FFC53D; --lemon-soft:rgba(255,197,61,.24);
+  --grape:#9A6BFF; --grape-soft:rgba(154,107,255,.15);
+  --pink:#FF7EB3; --pink-soft:rgba(255,126,179,.16);
+  --card:#FFFFFF; --edge:#F1DEC6;
+  --shadow:0 5px 0 rgba(58,43,77,.07), 0 16px 32px -18px rgba(58,43,77,.30);
+  --press:rgba(58,43,77,.16);
+  --r-lg:26px; --r-md:20px;
 }
 @media (prefers-color-scheme:dark){
   :root:not([data-theme="light"]){
-    --paper:#131816; --grid:#1E2724; --grid-bold:#2A3631;
-    --ink:#EAEFE9; --ink-2:#AFBDB5; --ink-3:#7E8D86;
-    --pencil:#5F6E68;
-    --cut:#E0A94B; --cut-fill:rgba(224,169,75,.22);
-    --ok:#66C998; --ok-soft:rgba(102,201,152,.12);
-    --no:#EF7A6C; --no-soft:rgba(239,122,108,.12);
-    --card:#19201D; --edge:#2A3530;
-    --shadow:0 1px 0 rgba(0,0,0,.3), 0 10px 28px -18px rgba(0,0,0,.8);
+    --paper:#1C1830; --dot-a:#2B2446; --dot-b:#222A40;
+    --grid:#28223E; --grid-bold:#332B4D;
+    --ink:#F5EEFF; --ink-2:#CDBFE3; --ink-3:#9587AF;
+    --pencil:#5D5179;
+    --cut:#FF9D57; --cut-fill:rgba(255,157,87,.22);
+    --ok:#4FD690; --ok-soft:rgba(79,214,144,.16);
+    --no:#FF7488; --no-soft:rgba(255,116,136,.16);
+    --sky:#6CC0FF; --sky-soft:rgba(108,192,255,.16);
+    --lemon:#FFD560; --lemon-soft:rgba(255,213,96,.16);
+    --grape:#B592FF; --grape-soft:rgba(181,146,255,.17);
+    --pink:#FF9CC6; --pink-soft:rgba(255,156,198,.16);
+    --card:#2A2442; --edge:#3E3561;
+    --shadow:0 5px 0 rgba(0,0,0,.32), 0 16px 32px -18px rgba(0,0,0,.85);
+    --press:rgba(0,0,0,.45);
   }
 }
 :root[data-theme="dark"]{
-  --paper:#131816; --grid:#1E2724; --grid-bold:#2A3631;
-  --ink:#EAEFE9; --ink-2:#AFBDB5; --ink-3:#7E8D86;
-  --pencil:#5F6E68;
-  --cut:#E0A94B; --cut-fill:rgba(224,169,75,.22);
-  --ok:#66C998; --ok-soft:rgba(102,201,152,.12);
-  --no:#EF7A6C; --no-soft:rgba(239,122,108,.12);
-  --card:#19201D; --edge:#2A3530;
-  --shadow:0 1px 0 rgba(0,0,0,.3), 0 10px 28px -18px rgba(0,0,0,.8);
+  --paper:#1C1830; --dot-a:#2B2446; --dot-b:#222A40;
+  --grid:#28223E; --grid-bold:#332B4D;
+  --ink:#F5EEFF; --ink-2:#CDBFE3; --ink-3:#9587AF;
+  --pencil:#5D5179;
+  --cut:#FF9D57; --cut-fill:rgba(255,157,87,.22);
+  --ok:#4FD690; --ok-soft:rgba(79,214,144,.16);
+  --no:#FF7488; --no-soft:rgba(255,116,136,.16);
+  --sky:#6CC0FF; --sky-soft:rgba(108,192,255,.16);
+  --lemon:#FFD560; --lemon-soft:rgba(255,213,96,.16);
+  --grape:#B592FF; --grape-soft:rgba(181,146,255,.17);
+  --pink:#FF9CC6; --pink-soft:rgba(255,156,198,.16);
+  --card:#2A2442; --edge:#3E3561;
+  --shadow:0 5px 0 rgba(0,0,0,.32), 0 16px 32px -18px rgba(0,0,0,.85);
+  --press:rgba(0,0,0,.45);
 }
 
 *{box-sizing:border-box}
 /* Artifact 宿主自带这两条，自托管必须自己补。
    少了第一条，凡是设了 display 的元素（.finish 是 flex）就顶掉 hidden 属性——
-   本来该藏起来的答案会一直露在页面上。 */
+   本来该藏起来的答案会一直露在页面上。各页自己的 style 里也要再写一遍，理由见页面注释。 */
 [hidden]{display:none !important}
 img{max-width:100%}
 body{
-  margin:0; background:var(--paper); color:var(--ink);
-  font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC",system-ui,sans-serif;
-  font-size:16px; line-height:1.75;
+  margin:0; background-color:var(--paper); color:var(--ink);
+  font-family:var(--f-body); font-size:16.5px; line-height:1.8;
   background-image:
-    linear-gradient(var(--grid) 1px, transparent 1px),
-    linear-gradient(90deg, var(--grid) 1px, transparent 1px),
-    linear-gradient(var(--grid-bold) 1px, transparent 1px),
-    linear-gradient(90deg, var(--grid-bold) 1px, transparent 1px);
-  background-size:26px 26px, 26px 26px, 130px 130px, 130px 130px;
+    radial-gradient(var(--dot-a) 2.4px, transparent 2.9px),
+    radial-gradient(var(--dot-b) 2.4px, transparent 2.9px);
+  background-size:36px 36px, 36px 36px;
+  background-position:0 0, 18px 18px;
 }
-main{max-width:960px; margin:0 auto; padding:clamp(26px,5vw,64px) clamp(16px,4vw,32px) 80px;
-  display:flex; flex-direction:column; gap:clamp(34px,5vw,58px)}
+main{max-width:980px; margin:0 auto; padding:clamp(22px,5vw,56px) clamp(14px,4vw,30px) 96px;
+  display:flex; flex-direction:column; gap:clamp(36px,5.4vw,60px)}
 
-.eyebrow{margin:0; font-family:"IBM Plex Mono",ui-monospace,monospace;
-  font-size:12px; letter-spacing:.22em; text-transform:uppercase; color:var(--ink-3)}
-h1{margin:.35em 0 0; font-size:clamp(30px,5.4vw,48px); line-height:1.15; font-weight:700;
-  letter-spacing:-.01em; text-wrap:balance}
-.lede{margin:.7em 0 0; color:var(--ink-2); max-width:34em}
-.head{display:flex; flex-direction:column; align-items:flex-start; gap:0}
+/* ---------- 标题区 ---------- */
+.head{display:flex; flex-direction:column; align-items:flex-start; gap:10px}
+.back{margin:0}
+.back a{display:inline-flex; align-items:center; gap:.3em; font-size:14px; font-weight:700; color:var(--ink-2);
+  background:var(--card); border:2.5px solid var(--edge); padding:.28em 1em; border-radius:999px;
+  text-decoration:none; box-shadow:0 4px 0 var(--edge); transition:transform .08s, box-shadow .08s, color .12s, border-color .12s}
+.back a:hover{color:var(--cut); border-color:var(--cut)}
+.back a:active{transform:translateY(4px); box-shadow:0 0 0 var(--edge)}
+.eyebrow{display:inline-flex; align-items:center; gap:.4em; margin:0; font-size:13.5px; font-weight:800;
+  color:color-mix(in srgb, var(--grape) 75%, var(--ink)); background:var(--grape-soft);
+  padding:.3em 1em; border-radius:999px; letter-spacing:.03em}
+h1{margin:.1em 0 0; font-family:var(--f-title); font-weight:700; font-synthesis-weight:none;
+  font-size:clamp(32px,6.2vw,54px); line-height:1.22; letter-spacing:.01em; text-wrap:balance}
+.hl{background:linear-gradient(transparent 56%, var(--lemon-soft) 56%, var(--lemon-soft) 92%, transparent 92%); padding:0 .06em}
+.lede{margin:0; font-size:clamp(16px,2.2vw,18.5px); color:var(--ink-2); max-width:36em}
 
-h2{margin:0 0 4px; font-size:clamp(19px,2.6vw,23px); font-weight:650; letter-spacing:-.005em;
-  display:flex; align-items:baseline; gap:.6em; text-wrap:balance}
-h2 .n{font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:13px; font-weight:600;
-  color:var(--cut); letter-spacing:.14em; flex:none}
-.sub{margin:0 0 20px; color:var(--ink-2); max-width:40em}
+/* 题卡 */
+.problem{position:relative; margin:6px 0 0; max-width:44em; background:var(--card);
+  border:3px dashed color-mix(in srgb, var(--cut) 55%, var(--edge)); border-radius:var(--r-md);
+  padding:26px 20px 16px; font-size:16.5px; line-height:1.85; color:var(--ink); box-shadow:var(--shadow)}
+.problem-tag{position:absolute; top:-15px; left:18px; font-size:14px; font-weight:800; color:#fff;
+  background:var(--cut); padding:.2em .95em; border-radius:999px; box-shadow:0 3px 0 var(--press); transform:rotate(-3deg)}
+.problem p{margin:0}
 
-.slab{background:var(--card); border:1px solid var(--edge); border-radius:3px;
-  padding:clamp(18px,3vw,28px); box-shadow:var(--shadow)}
+/* ---------- 小节 ---------- */
+h2{margin:0 0 6px; font-family:var(--f-title); font-weight:700; font-synthesis-weight:none;
+  font-size:clamp(23px,3.4vw,30px); line-height:1.3; display:flex; align-items:center; gap:.55em; text-wrap:balance}
+h2 .n{flex:none; display:grid; place-items:center; width:1.75em; height:1.75em;
+  border-radius:44% 56% 52% 48% / 54% 46% 54% 46%;
+  font-family:var(--f-num); font-size:17px; font-weight:700; color:#fff; background:var(--cut);
+  box-shadow:0 4px 0 var(--press); transform:rotate(-7deg)}
+h2 .n.sky{background:var(--sky)} h2 .n.grape{background:var(--grape)}
+h2 .n.pink{background:var(--pink)} h2 .n.ok{background:var(--ok)}
+.sub{margin:0 0 22px; color:var(--ink-2); max-width:42em}
+.sub b{color:var(--ink); font-weight:800}
 
-.back{margin:0 0 4px; font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:12px;
-  letter-spacing:.14em; text-transform:uppercase}
-.back a{color:var(--ink-3); text-decoration:none; border-bottom:1px solid var(--edge); padding-bottom:2px}
-.back a:hover, .back a:focus-visible{color:var(--cut); border-color:var(--cut)}
+.slab{background:var(--card); border:2.5px solid var(--edge); border-radius:var(--r-lg);
+  padding:clamp(18px,3.2vw,30px); box-shadow:var(--shadow)}
 
-:focus-visible{outline:2px solid var(--cut); outline-offset:3px}
+/* ---------- 按钮 ---------- */
+.pills, .choice{display:flex; flex-wrap:wrap; align-items:center; gap:10px}
+.ask{font-size:14px; font-weight:700; color:var(--ink-3); margin-right:2px}
+.pills button, .choice button, .btn{
+  font:inherit; font-size:15px; font-weight:800; line-height:1.3; color:var(--ink-2);
+  background:var(--card); border:2.5px solid var(--edge); border-radius:999px;
+  padding:.42em 1.15em; cursor:pointer; font-variant-numeric:tabular-nums;
+  box-shadow:0 4px 0 var(--edge);
+  transition:transform .08s, box-shadow .08s, border-color .12s, color .12s, background .12s;
+}
+.pills button:hover, .choice button:not(:disabled):hover, .btn:hover{border-color:var(--cut); color:var(--cut)}
+.pills button:active, .choice button:not(:disabled):active, .btn:active{transform:translateY(4px); box-shadow:0 0 0 var(--edge)}
+.pills button[aria-pressed="true"]{border-color:var(--cut); color:var(--cut); background:var(--cut-fill);
+  box-shadow:0 4px 0 color-mix(in srgb, var(--cut) 55%, transparent)}
+.pills .go, .btn.go{color:#fff; background:var(--cut); border-color:var(--cut);
+  box-shadow:0 4px 0 color-mix(in srgb, var(--cut) 62%, #000)}
+.pills .go:hover, .btn.go:hover{color:#fff; filter:brightness(1.07)}
+.choice button:disabled{cursor:default; box-shadow:none}
+.choice button:disabled:not(.is-ans):not(.is-miss){opacity:.4}
+.choice button.is-ans{border-color:var(--ok); color:var(--ok); background:var(--ok-soft)}
+.choice button.is-miss{border-color:var(--no); color:var(--no); background:var(--no-soft); text-decoration:line-through}
+
+/* 滑块：粗轨道 + 圆胖手柄 */
+input[type=range]{-webkit-appearance:none; appearance:none; width:100%; height:30px; margin:0; background:transparent; cursor:pointer}
+input[type=range]::-webkit-slider-runnable-track{height:14px; border-radius:999px; background:var(--cut-fill);
+  border:2px solid color-mix(in srgb, var(--cut) 35%, transparent)}
+input[type=range]::-webkit-slider-thumb{-webkit-appearance:none; width:30px; height:30px; margin-top:-10px; border-radius:50%;
+  background:var(--card); border:5px solid var(--cut); box-shadow:0 3px 0 color-mix(in srgb, var(--cut) 55%, #000)}
+input[type=range]::-moz-range-track{height:14px; border-radius:999px; background:var(--cut-fill);
+  border:2px solid color-mix(in srgb, var(--cut) 35%, transparent)}
+input[type=range]::-moz-range-thumb{width:22px; height:22px; border-radius:50%; background:var(--card); border:5px solid var(--cut)}
+
+/* ---------- 讲道理的卡片 ---------- */
+.rules{display:grid; grid-template-columns:repeat(auto-fit,minmax(250px,1fr)); gap:18px}
+.rule{background:var(--card); border:2.5px solid var(--edge); border-radius:var(--r-md); padding:20px;
+  display:flex; flex-direction:column; gap:12px; box-shadow:var(--shadow)}
+.rule svg{width:100%; height:auto; display:block}
+.rule h3{margin:0; font-size:17.5px; font-weight:800; line-height:1.45; text-wrap:balance}
+.rule p{margin:0; font-size:14.5px; color:var(--ink-2); line-height:1.8}
+.rule p b, .rule p strong{color:var(--ink); font-weight:800}
+.rule .tag{align-self:flex-start; font-size:13px; font-weight:800; padding:.22em .9em; border-radius:999px;
+  color:color-mix(in srgb, var(--cut) 72%, var(--ink)); background:var(--cut-fill)}
+.rule.sky{border-color:color-mix(in srgb, var(--sky) 32%, var(--edge))}
+.rule.sky .tag{color:color-mix(in srgb, var(--sky) 70%, var(--ink)); background:var(--sky-soft)}
+.rule.grape{border-color:color-mix(in srgb, var(--grape) 30%, var(--edge))}
+.rule.grape .tag{color:color-mix(in srgb, var(--grape) 72%, var(--ink)); background:var(--grape-soft)}
+.rule.pink{border-color:color-mix(in srgb, var(--pink) 34%, var(--edge))}
+.rule.pink .tag{color:color-mix(in srgb, var(--pink) 68%, var(--ink)); background:var(--pink-soft)}
+
+/* ---------- 自己判 / 自己选 ---------- */
+.q-grid{display:grid; grid-template-columns:repeat(auto-fit,minmax(290px,1fr)); gap:18px}
+.q-card{position:relative; background:var(--card); border:2.5px solid var(--edge); border-radius:var(--r-md);
+  padding:18px 18px 20px; display:flex; flex-direction:column; gap:12px; box-shadow:var(--shadow)}
+.q-card.good{border-color:color-mix(in srgb, var(--ok) 58%, var(--edge))}
+.q-card.bad{border-color:color-mix(in srgb, var(--no) 58%, var(--edge))}
+.q-card.hit{animation:pop .5s ease}
+.q-card.miss{animation:shake .45s ease}
+.q-card header{display:flex; align-items:center; justify-content:space-between; gap:12px}
+.q-card .id{display:grid; place-items:center; min-width:38px; height:38px; padding:0 8px; border-radius:50%;
+  font-family:var(--f-num); font-size:20px; font-weight:700; line-height:1;
+  color:color-mix(in srgb, var(--cut) 78%, var(--ink)); background:var(--cut-fill)}
+.q-card .q{margin:0; font-size:16.5px; font-weight:800; line-height:1.6; text-wrap:balance}
+.verdict{font-size:13.5px; font-weight:800; padding:.26em .95em; border-radius:999px}
+.good .verdict{color:var(--ok); background:var(--ok-soft)}
+.bad .verdict{color:var(--no); background:var(--no-soft)}
+.why{margin:0; font-size:14.5px; line-height:1.85; color:var(--ink-2); background:var(--lemon-soft);
+  border-radius:14px; padding:12px 14px}
+.why b{color:var(--ink); font-weight:800}
+.picked{margin:2px 0 0; font-size:15px; font-weight:800}
+.picked.hit{color:var(--ok)}
+.picked.miss{color:var(--no)}
+
+.reveal-bar{display:flex; flex-wrap:wrap; align-items:center; gap:12px; margin-top:20px}
+.reveal-bar p{margin:0; font-size:15px; font-weight:700; color:var(--ink-3)}
+.reveal-bar p b{color:var(--cut); font-family:var(--f-num); font-size:1.2em}
+
+/* ---------- 做完了 ---------- */
+.finish{position:relative; overflow:hidden; display:flex; flex-wrap:wrap; align-items:center; gap:clamp(16px,3vw,30px);
+  background:var(--card); border:3px solid color-mix(in srgb, var(--ok) 55%, var(--edge));
+  border-radius:28px; padding:clamp(22px,3.6vw,34px); box-shadow:var(--shadow)}
+.finish::before{content:""; position:absolute; inset:0; pointer-events:none;
+  background:radial-gradient(circle at 10% 18%, var(--lemon-soft), transparent 42%),
+             radial-gradient(circle at 92% 88%, var(--pink-soft), transparent 44%)}
+.finish > *{position:relative}
+.finish .big{font-family:var(--f-num); font-size:clamp(42px,9vw,70px); font-weight:700; line-height:1.05; color:var(--ok)}
+.fin-side{display:flex; flex-direction:column; gap:8px; flex:1 1 250px}
+.stars{font-size:clamp(28px,5.4vw,36px); letter-spacing:.08em; line-height:1}
+.stars .on{color:var(--lemon); text-shadow:0 2px 0 color-mix(in srgb, var(--lemon) 50%, #000)}
+.stars .off{color:var(--edge)}
+.score{margin:0; font-size:16px; font-weight:800}
+.cheer{margin:0; font-size:15.5px}
+.fin-why{margin:0; font-size:14.5px; line-height:1.85; color:var(--ink-2)}
+
+/* ---------- 小团子 ----------
+   五官是插画用色，不跟主题翻转：暗色模式下眼白仍是白、瞳孔仍是深色。身体颜色由调用方传主题变量。 */
+.mascot{flex:none; display:inline-block; line-height:0}
+.mascot svg{display:block; overflow:visible}
+.bob{animation:bob 2.6s ease-in-out infinite}
+.eye-w{fill:#FFFFFF}
+.eye-p{fill:#2B2138}
+.blush{fill:#FF8FB1; opacity:.65}
+.mouth{fill:none; stroke:#2B2138; stroke-width:1.6; stroke-linecap:round; stroke-linejoin:round}
+.mouth-o{fill:#2B2138}
+.shine{fill:#FFFFFF; opacity:.35}
+.critter-name{font-size:12.5px; font-weight:800; fill:var(--ink); font-family:var(--f-body)}
+
+/* 团子说话 */
+.talk{display:flex; align-items:flex-end; gap:8px}
+.talk .mascot{margin-bottom:-2px}
+.bubble{position:relative; flex:1; margin:0; padding:12px 16px; font-size:15px; line-height:1.7; color:var(--ink);
+  background:var(--sky-soft); border-radius:18px 18px 18px 6px; min-height:3.6em}
+.bubble b{font-weight:800}
+
+/* ---------- 撒彩纸 ---------- */
+.confetti{position:absolute; width:9px; height:12px; border-radius:3px; pointer-events:none; z-index:50;
+  animation:fly .95s cubic-bezier(.2,.7,.3,1) forwards}
+@keyframes fly{
+  0%{transform:translate(-50%,-50%) rotate(0); opacity:1}
+  100%{transform:translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) rotate(var(--rot)); opacity:0}
+}
+@keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.045) rotate(-.6deg)}100%{transform:scale(1)}}
+@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-8px)}40%{transform:translateX(7px)}60%{transform:translateX(-5px)}80%{transform:translateX(3px)}}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+
+:focus-visible{outline:3px solid var(--cut); outline-offset:3px; border-radius:6px}
 @media (prefers-reduced-motion:reduce){*{animation:none !important; transition:none !important}}
