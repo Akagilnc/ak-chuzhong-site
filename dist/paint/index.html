@@ -1,0 +1,421 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>给积木刷油漆</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=ZCOOL+KuaiLe&display=swap" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="../base.css?v=3">
+<style>
+/* 这条必须留在页面自己的 style 里：外链 CSS 被缓存时，
+   设了 display 的元素会顶掉 hidden，答案就露出来了。 */
+[hidden]{display:none !important}
+
+/* 题卡里的三个小图 */
+.figs{display:flex; flex-wrap:wrap; align-items:flex-end; justify-content:space-around; gap:8px; margin:14px 0 10px}
+.fig{display:flex; flex-direction:column; align-items:center; gap:0; font-family:var(--f-num); font-size:18px; font-weight:700; color:var(--ink-2)}
+.fig svg{display:block; width:clamp(72px,18vw,110px); height:auto}
+.asks{margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:6px}
+
+/* 刷油漆的舞台 */
+.stage{display:grid; grid-template-columns:minmax(0,1.05fr) minmax(0,.95fr); gap:clamp(18px,3vw,32px); align-items:center;
+  background:linear-gradient(180deg, var(--grape-soft), transparent 62%), var(--card)}
+@media (max-width:720px){.stage{grid-template-columns:1fr}}
+.tower svg{width:100%; height:auto; display:block}
+.f-top{fill:var(--card)}
+.f-x{fill:color-mix(in srgb, var(--pencil) 60%, var(--card))}
+.f-y{fill:color-mix(in srgb, var(--pencil) 30%, var(--card))}
+.ctl{display:flex; flex-direction:column; gap:14px}
+.nlabel{margin:0; font-size:14px; font-weight:700; color:var(--ink-3)}
+.nlabel b{font-family:var(--f-num); font-size:24px; color:var(--grape); vertical-align:-.12em}
+.facing{margin:0; font-size:13px; font-weight:700; color:var(--ink-3)}
+.pills.buckets button i{display:inline-block; width:14px; height:14px; margin-right:6px; vertical-align:-2px;
+  border-radius:50%; background:var(--c); border:2px solid color-mix(in srgb, var(--ink) 18%, transparent)}
+.pills.buckets button b{margin-left:4px; font-family:var(--f-num); color:var(--ink)}
+.pills.buckets button[aria-pressed="true"]{border-color:var(--c); color:var(--ink);
+  background:color-mix(in srgb, var(--c) 24%, var(--card)); box-shadow:0 4px 0 color-mix(in srgb, var(--c) 60%, transparent)}
+.count{font-size:clamp(20px,3.4vw,26px); font-weight:800; line-height:1.25}
+.count em{display:block; font-style:normal; font-size:13.5px; font-weight:700; color:var(--ink-3); margin-bottom:2px}
+.count span{font-family:var(--f-num); font-size:1.9em; color:var(--grape); font-variant-numeric:tabular-nums; vertical-align:-.08em}
+
+.finish .fin-pal{align-self:center}
+</style>
+</head>
+<body>
+<main>
+  <header class="head">
+    <p class="back"><a href="../">← 回到初中图解</a></p>
+    <p class="eyebrow">🎨 几何 · 表面积</p>
+    <h1>给积木刷油漆，<span class="hl">一共要刷几个面</span></h1>
+    <div class="problem">
+      <span class="problem-tag">📝 题目</span>
+      <p>用棱长为 2cm 的若干小正方体，按下图的规律在地面上搭建若干个几何体。每个几何体自上而下分别叫第一层、第二层、……、第 n 层（n 为正整数）。</p>
+      <div class="figs" aria-hidden="true">
+        <div class="fig"><div id="fig1"></div>①</div>
+        <div class="fig"><div id="fig2"></div>②</div>
+        <div class="fig"><div id="fig3"></div>③</div>
+      </div>
+      <ol class="asks">
+        <li>(1) 搭建第④个几何体的小立方体的个数为多少？</li>
+        <li>(2) 分别求出第②、③个几何体的所有露出部分（不含底面）的面积。</li>
+        <li>(3) 为了美观，若将几何体的露出部分都涂上油漆（不含底面），已知喷涂 1cm² 需要油漆 0.2 克，求喷涂第 20 个几何体，共需要多少克油漆？</li>
+      </ol>
+    </div>
+  </header>
+
+  <section>
+    <h2><span class="n">01</span>给积木刷油漆</h2>
+    <p class="sub">拖滑块换第几个积木塔，再点油漆桶，把露在外面的面<b>一个方向一个方向</b>刷上。看不到的背面，点「转一转」绕过去看看。</p>
+    <div class="slab stage">
+      <div class="tower"><svg id="tower" role="img" aria-label="一层一层叠起来的积木塔"></svg></div>
+      <div class="ctl">
+        <div>
+          <p class="nlabel">第 <b id="nNow">③</b> 个积木塔</p>
+          <input type="range" id="nSlider" min="1" max="6" step="1" value="3" aria-label="第几个积木塔">
+        </div>
+        <div class="pills buckets" id="buckets" role="group" aria-label="油漆桶">
+          <button type="button" data-d="top" style="--c:var(--lemon)"><i></i>上面<b></b></button>
+          <button type="button" data-d="front" style="--c:var(--cut)"><i></i>前面<b></b></button>
+          <button type="button" data-d="back" style="--c:var(--grape)"><i></i>后面<b></b></button>
+          <button type="button" data-d="left" style="--c:var(--sky)"><i></i>左面<b></b></button>
+          <button type="button" data-d="right" style="--c:var(--pink)"><i></i>右面<b></b></button>
+        </div>
+        <div class="pills">
+          <button type="button" class="go" id="spin">↻ 转一转</button>
+          <button type="button" id="wipe">全部擦掉</button>
+        </div>
+        <p class="facing" id="facing"></p>
+        <div class="count"><em>已经刷了</em><span id="painted">0</span> 个小面</div>
+        <div class="talk"><span class="mascot" id="guide"></span><p class="bubble" id="hint" aria-live="polite"></p></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="n sky">02</span>看出门道了吗</h2>
+    <p class="sub">不管是第几个积木塔，露出来的面都能分成这三块来数。</p>
+    <div class="rules">
+      <div class="rule sky">
+        <span class="tag">门道 1</span>
+        <div id="ruleA"></div>
+        <h3>从上往下看，正好是底层那么大</h3>
+        <p>每一格从上往下看，都只能看到<b>最上面那一块的顶</b>。拼起来就是整个底层：第 n 个就是 <b>n × n</b> 个面。</p>
+      </div>
+      <div class="rule grape">
+        <span class="tag">门道 2</span>
+        <div id="ruleB"></div>
+        <h3>前后左右四个侧面，每面都是 1 + 2 + … + n</h3>
+        <p>从前面看，一层一层是 1 个、2 个、3 个……排成台阶。<b>后面、左面、右面也一样</b>，所以侧面一共 4 × (1 + 2 + … + n)。<b>最容易漏的：只算了一个侧面。</b></p>
+      </div>
+      <div class="rule pink">
+        <span class="tag">门道 3</span>
+        <div id="ruleC"></div>
+        <h3>贴地的底面不刷，每个小面 4 cm²</h3>
+        <p>题目说<b>不含底面</b>。小正方体棱长 2cm，每个小面就是 2 × 2 = <b>4 cm²</b>。先数出有几个面，再乘 4。</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2><span class="n grape">03</span>轮到你啦</h2>
+    <p class="sub">回到这道题。<b>每一步先自己选</b>，点下去才揭晓～</p>
+    <div class="q-grid" id="steps"></div>
+    <div class="reveal-bar" id="revealBar">
+      <span class="mascot" id="helper"></span>
+      <p id="barMsg">还剩 <b>4</b> 步没做</p>
+    </div>
+  </section>
+
+  <section class="finish" id="finish" hidden>
+    <span class="mascot bob fin-pal" id="finPal"></span>
+    <div class="big" id="bigAns"></div>
+    <div class="fin-side">
+      <div class="stars" id="stars" aria-hidden="true"></div>
+      <p class="score" id="score"></p>
+      <p class="cheer" id="cheer"></p>
+      <p class="fin-why" id="finWhy"></p>
+      <div class="pills"><button type="button" class="go" id="retry">再做一遍 ↺</button></div>
+    </div>
+  </section>
+</main>
+
+<script src="../kit.js?v=1"></script>
+<script>
+const { el, dec, burst, mascot, reduceMotion } = Kit;
+const put = (id, m) => document.getElementById(id).replaceChildren(mascot(m));
+const CIRCLED = "①②③④⑤⑥";
+
+/* ---------- 积木塔 ----------
+   第 k 层是 k×k，底层 n×n 贴地(z=0)。上面的层压在下面层的同一个角上 ——
+   压在哪个位置都不影响露出面的个数，这里只是为了从默认角度看过去是台阶。
+   世界坐标：+y 前、−y 后、−x 左、+x 右、+z 上。 */
+const DIRS = [
+  { key: "top",   label: "上面", v: [0, 0, 1],  color: "var(--lemon)" },
+  { key: "front", label: "前面", v: [0, 1, 0],  color: "var(--cut)" },
+  { key: "back",  label: "后面", v: [0, -1, 0], color: "var(--grape)" },
+  { key: "left",  label: "左面", v: [-1, 0, 0], color: "var(--sky)" },
+  { key: "right", label: "右面", v: [1, 0, 0],  color: "var(--pink)" },
+];
+const dirOf = (dx, dy, dz) => DIRS.find(d => d.v[0] === dx && d.v[1] === dy && d.v[2] === dz);
+
+function tower(n) {
+  const cells = [];
+  for (let k = 1; k <= n; k++)
+    for (let x = 0; x < k; x++)
+      for (let y = 0; y < k; y++) cells.push([x, y, n - k]);
+  const has = new Set(cells.map(c => c.join(",")));
+  const cnt = {};
+  for (const d of DIRS)
+    cnt[d.key] = cells.filter(([x, y, z]) => !has.has([x + d.v[0], y + d.v[1], z + d.v[2]].join(","))).length;
+  return { cells, has, cnt };
+}
+
+// 转 r 次 90°：格子和方向用同一个转法
+const rotCell = (x, y, r, n) => [[x, y], [n - 1 - y, x], [n - 1 - x, n - 1 - y], [y, n - 1 - x]][r];
+const rotVec = (dx, dy, r) => [[dx, dy], [-dy, dx], [-dx, -dy], [dy, -dx]][r];
+
+// 等轴测画法：从 (+X,+Y,+Z) 那一侧看过去，每块只画看得到的三个面，由远到近画，近的自然盖住远的
+function drawTower(svg, n, r, painted, W, H, maxS) {
+  const { cells, has } = tower(n);
+  const C30 = Math.cos(Math.PI / 6);
+  const P = (X, Y, Z) => [(X - Y) * C30, (X + Y) * .5 - Z];
+  const view = cells.map(([x, y, z]) => { const [X, Y] = rotCell(x, y, r, n); return { x, y, z, X, Y, Z: z }; });
+
+  let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
+  for (const c of view)
+    for (const [a, b, h] of [[0, 0, 1], [1, 0, 1], [0, 1, 1], [1, 1, 1], [1, 1, 0], [0, 1, 0], [1, 0, 0]]) {
+      const [px, py] = P(c.X + a, c.Y + b, c.Z + h);
+      x0 = Math.min(x0, px); x1 = Math.max(x1, px); y0 = Math.min(y0, py); y1 = Math.max(y1, py);
+    }
+  const pad = 12, s = Math.min((W - 2 * pad) / (x1 - x0), (H - 2 * pad) / (y1 - y0), maxS);
+  const ox = W / 2 - (x0 + x1) / 2 * s, oy = H / 2 - (y0 + y1) / 2 * s;
+  const pt = (X, Y, Z) => { const [px, py] = P(X, Y, Z); return `${(px * s + ox).toFixed(1)},${(py * s + oy).toFixed(1)}`; };
+
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  svg.replaceChildren();
+  view.sort((a, b) => (a.X + a.Y + a.Z) - (b.X + b.Y + b.Z));
+  const inv = (4 - r) % 4;
+  const sw = Math.max(1, Math.min(1.8, s / 30));
+  for (const c of view) {
+    const { X, Y, Z } = c;
+    const faces = [
+      { base: "f-top", shade: 0,   poly: [[X, Y, Z + 1], [X + 1, Y, Z + 1], [X + 1, Y + 1, Z + 1], [X, Y + 1, Z + 1]], w: [0, 0, 1] },
+      { base: "f-x",   shade: .12, poly: [[X + 1, Y, Z], [X + 1, Y + 1, Z], [X + 1, Y + 1, Z + 1], [X + 1, Y, Z + 1]], w: [...rotVec(1, 0, inv), 0] },
+      { base: "f-y",   shade: .05, poly: [[X, Y + 1, Z], [X + 1, Y + 1, Z], [X + 1, Y + 1, Z + 1], [X, Y + 1, Z + 1]], w: [...rotVec(0, 1, inv), 0] },
+    ];
+    for (const f of faces) {
+      const d = dirOf(...f.w);
+      const exposed = !has.has([c.x + f.w[0], c.y + f.w[1], c.z + f.w[2]].join(","));
+      const points = f.poly.map(p => pt(...p)).join(" ");
+      if (exposed && painted.has(d.key)) {
+        svg.append(el("polygon", { points, fill: d.color, "data-dir": d.key }));
+        if (f.shade) svg.append(el("polygon", { points, fill: "#000", opacity: f.shade }));
+        svg.append(el("polygon", { points, fill: "none", stroke: "var(--ink)", "stroke-width": sw, "stroke-linejoin": "round" }));
+      } else {
+        svg.append(el("polygon", { points, class: f.base, stroke: "var(--ink)", "stroke-width": sw, "stroke-linejoin": "round" }));
+      }
+    }
+  }
+}
+
+// 题卡里的 ①②③
+for (let k = 1; k <= 3; k++) {
+  const s = el("svg", { role: "img", "aria-label": `第 ${k} 个积木塔` });
+  drawTower(s, k, 0, new Set(), 120, 120, 26);
+  document.getElementById("fig" + k).append(s);
+}
+
+/* ---------- 1. 刷油漆 ---------- */
+const towerSvg = document.getElementById("tower");
+const nSlider = document.getElementById("nSlider");
+const bucketBtns = [...document.querySelectorAll("#buckets button")];
+const painted = new Set();
+let N = 3, R = 0, guideMood = "";
+
+function refresh() {
+  drawTower(towerSvg, N, R, painted, 400, 340, 64);
+  const { cnt } = tower(N);
+  let total = 0;
+  for (const b of bucketBtns) {
+    const k = b.dataset.d, on = painted.has(k);
+    b.setAttribute("aria-pressed", on);
+    b.querySelector("b").textContent = on ? cnt[k] : "";
+    if (on) total += cnt[k];
+  }
+  document.getElementById("painted").textContent = total;
+  document.getElementById("nNow").textContent = CIRCLED[N - 1];
+
+  const inv = (4 - R) % 4;
+  const leftSide = dirOf(...rotVec(0, 1, inv), 0).label, rightSide = dirOf(...rotVec(1, 0, inv), 0).label;
+  document.getElementById("facing").textContent = `现在看得到：上面、${leftSide}、${rightSide}`;
+
+  const sides = ["front", "back", "left", "right"].filter(k => painted.has(k)).length;
+  let h, mood;
+  if (painted.size === 0) { h = "把露在外面的面都刷上油漆吧！<b>底面贴着地</b>，不用刷。"; mood = "happy"; }
+  else if (painted.size === 5) { h = `<b>全刷完啦 🎉</b> 上面 ${cnt.top} 个，四个侧面各 ${cnt.front} 个，一共 <b>${total}</b> 个小面。`; mood = "wow"; }
+  else if (painted.has("top") && sides === 1) { h = "只刷了上面和<b>一个</b>侧面？另外三个侧面也露在外面哦，转过去看看～"; mood = "hmm"; }
+  else { h = `还有 <b>${5 - painted.size}</b> 个方向没刷。看不到的那几面，点「转一转」绕过去看看？`; mood = "hmm"; }
+  document.getElementById("hint").innerHTML = h;
+  if (mood !== guideMood) { put("guide", { color: "var(--grape)", mood, look: 1, size: 58 }); guideMood = mood; }
+}
+
+document.getElementById("buckets").addEventListener("click", e => {
+  const b = e.target.closest("button[data-d]");
+  if (!b) return;
+  const k = b.dataset.d;
+  if (painted.has(k)) painted.delete(k); else painted.add(k);
+  refresh();
+  if (painted.size === 5) burst(document.getElementById("painted"), 24);
+});
+nSlider.addEventListener("input", () => { N = +nSlider.value; refresh(); });
+document.getElementById("spin").addEventListener("click", () => { R = (R + 1) % 4; refresh(); });
+document.getElementById("wipe").addEventListener("click", () => { painted.clear(); refresh(); });
+refresh();
+
+/* ---------- 2. 门道小图 ---------- */
+(() => {
+  const s = el("svg", { viewBox: "0 0 300 124" });
+  const u = 30, x0 = 105, y0 = 6;
+  for (let i = 0; i < 3; i++)
+    for (let j = 0; j < 3; j++)
+      s.append(el("rect", { x: x0 + j * u, y: y0 + i * u, width: u - 4, height: u - 4, rx: 7,
+        fill: "var(--lemon)", stroke: "var(--ink)", "stroke-width": 1.4 }));
+  s.append(el("text", { x: 150, y: 116, "text-anchor": "middle", fill: "var(--ink-2)", "font-size": 14, "font-weight": 700 }, "上面：3 × 3 = 9 个"));
+  document.getElementById("ruleA").append(s);
+})();
+(() => {
+  const s = el("svg", { viewBox: "0 0 300 124" });
+  const u = 26, x0 = 18, y0 = 6;
+  for (let row = 0; row < 3; row++)
+    for (let c = 0; c <= row; c++)
+      s.append(el("rect", { x: x0 + c * u, y: y0 + row * u, width: u - 4, height: u - 4, rx: 6,
+        fill: "var(--cut)", stroke: "var(--ink)", "stroke-width": 1.4 }));
+  s.append(el("text", { x: x0 + 38, y: 112, "text-anchor": "middle", fill: "var(--ink-2)", "font-size": 13, "font-weight": 700 }, "1+2+3=6"));
+  s.append(el("text", { x: 118, y: 52, fill: "var(--ink)", "font-size": 24, "font-weight": 800 }, "×"));
+  [["前", "var(--cut)"], ["后", "var(--grape)"], ["左", "var(--sky)"], ["右", "var(--pink)"]].forEach(([t, c], i) => {
+    const cx = 158 + i * 34;
+    s.append(el("circle", { cx, cy: 44, r: 14, fill: c, stroke: "var(--ink)", "stroke-width": 1.4 }));
+    s.append(el("text", { x: cx, y: 49, "text-anchor": "middle", fill: "#fff", "font-size": 14, "font-weight": 800 }, t));
+  });
+  s.append(el("text", { x: 209, y: 90, "text-anchor": "middle", fill: "var(--ink-2)", "font-size": 13, "font-weight": 700 }, "四个侧面：4 × 6 = 24 个"));
+  document.getElementById("ruleB").append(s);
+})();
+(() => {
+  const s = el("svg", { viewBox: "0 0 300 124" });
+  s.append(el("rect", { x: 46, y: 12, width: 76, height: 76, rx: 10, fill: "var(--pink-soft)", stroke: "var(--pink)", "stroke-width": 2.6 }));
+  s.append(el("text", { x: 84, y: 56, "text-anchor": "middle", fill: "var(--ink)", "font-size": 17, "font-weight": 800 }, "4cm²"));
+  s.append(el("text", { x: 84, y: 108, "text-anchor": "middle", fill: "var(--ink-2)", "font-size": 13, "font-weight": 700 }, "2cm"));
+  s.append(el("text", { x: 30, y: 54, "text-anchor": "middle", fill: "var(--ink-2)", "font-size": 13, "font-weight": 700, transform: "rotate(-90 30 54)" }, "2cm"));
+  s.append(el("rect", { x: 162, y: 34, width: 112, height: 36, rx: 10, fill: "var(--no-soft)", stroke: "var(--no)", "stroke-width": 2, "stroke-dasharray": "6 5" }));
+  s.append(el("text", { x: 218, y: 57, "text-anchor": "middle", fill: "var(--no)", "font-size": 14, "font-weight": 800 }, "贴地的底面 ✗"));
+  document.getElementById("ruleC").append(s);
+})();
+
+/* ---------- 3. 轮到你啦 ---------- */
+const STEPS = [
+  { q: "第④个几何体一共用了多少个小立方体？", opts: ["10", "16", "30", "64"], k: "eyJhbnMiOiAiMzAiLCAid2h5IjogIuS7juS4iuW+gOS4i+avj+WxguaYryAxw5cx44CBMsOXMuOAgTPDlzPjgIE0w5c077yM5LiA5YWxIDEgKyA0ICsgOSArIDE2ID0gPGI+MzA8L2I+IOS4quOAgumAiSAxNiDmmK/lj6rmlbDkuobmnIDlupXkuIvkuIDlsYLvvJs2NCDmmK/lvZPmiJDkuoYgNMOXNMOXNCDnmoTlpKfmraPmlrnkvZPvvJsxMCDmmK/miormr4/lsYLlvZPmiJDkuobkuIDmjpLjgIIifQ==" },
+  { q: "第②个几何体露出来的小正方形面有几个？（不含底面）", opts: ["7", "12", "16", "20"], k: "eyJhbnMiOiAiMTYiLCAid2h5IjogIuS7juS4iumdoueci+S4i+WOu+aYryAyIMOXIDLvvIzpnLLlh7ogPGI+NDwvYj4g5Liq6Z2i77yb5YmN44CB5ZCO44CB5bem44CB5Y+z5q+P5Liq5pa55ZCR6YO96IO955yL5YiwIDEgKyAyID0gMyDkuKrpnaLvvIzlm5vkuKrmlrnlkJHkuIDlhbEgNCDDlyAzID0gPGI+MTI8L2I+IOS4quOAguWQiOi1t+adpSA0ICsgMTIgPSA8Yj4xNjwvYj4g5Liq44CC6YCJIDcg5piv5Y+q566X5LqG5LiK6Z2i5ZKMPGI+5LiA5LiqPC9iPuS+p+mdou+8jOWPpuWkluS4ieS4quS+p+mdouS5n+mcsuWcqOWklumdou+8mzEyIOaYr+W/mOS6huS4iumdou+8mzIwIOaYr+aKiui0tOWcsOeahOW6lemdouS5n+eul+i/m+WOu+S6huOAgiJ9" },
+  { q: "第③个几何体露出部分的面积是多少 cm²？", opts: ["60", "66", "132", "168"], k: "eyJhbnMiOiAiMTMyIiwgIndoeSI6ICLkuIrpnaIgMyDDlyAzID0gOSDkuKrpnaLvvJvmr4/kuKrkvqfpnaIgMSArIDIgKyAzID0gNiDkuKrvvIzlm5vkuKrkvqfpnaIgMjQg5Liq77yb5LiA5YWxIDxiPjMzPC9iPiDkuKrlsI/pnaLjgILmr4/kuKrlsI/pnaIgMmNtIMOXIDJjbSA9IDRjbcKy77yM6Z2i56evID0gMzMgw5cgNCA9IDxiPjEzMiBjbcKyPC9iPuOAgumAiSA2MCDmmK/lj6rnrpfkuobkuIDkuKrkvqfpnaLvvJs2NiDmmK/miormr4/kuKrpnaLlvZPmiJDkuoYgMmNtwrLvvJsxNjgg5piv6L+e5bqV6Z2i5Lmf566X6L+b5Y675LqG44CCIn0=" },
+  { q: "喷涂第⑳个几何体，一共要多少克油漆？", opts: ["488", "992", "1312", "4960"], k: "eyJhbnMiOiAiOTkyIiwgIndoeSI6ICLnrKzikbPkuKrvvJrkuIrpnaIgMjAgw5cgMjAgPSA0MDAg5Liq6Z2i77yb5q+P5Liq5L6n6Z2iIDEgKyAyICsg4oCmICsgMjAgPSAyMTAg5Liq77yM5Zub5Liq5L6n6Z2iIDg0MCDkuKrvvJvkuIDlhbEgMTI0MCDkuKrlsI/pnaLjgILpnaLnp68gMTI0MCDDlyA0ID0gNDk2MCBjbcKy77yM5rK55ryGIDQ5NjAgw5cgMC4yID0gPGI+OTkyIOWFizwvYj7jgILpgIkgNDg4IOaYr+WPqueul+S6huS4gOS4quS+p+mdou+8mzQ5NjAg5piv5b+Y5LqG5LmYIDAuMu+8mzEzMTIg5piv6L+e5bqV6Z2i5Lmf5raC5LqG44CCIn0=" },
+];
+const FIN = "eyJiaWciOiAiOTkyIOWFiyIsICJ3aHkiOiAi6K6w5L2P5LiA5Y+l5bCx5aSf55So77ya6Zyy5Ye655qE6Z2iID0g5LiK6Z2iIG7CsiDkuKogKyDliY3lkI7lt6blj7Plm5vkuKrkvqfpnaLvvIzmr4/kuKrkvqfpnaLpg73mmK8gMSArIDIgKyDigKYgKyBu44CC5pyA5a655piT5ryP55qE77yM5piv5Y+q566X5LiA5Liq5L6n6Z2i44CCIn0=";
+const CHEER = [
+  "没关系，这题本来就爱挖坑。把解析读一遍，再做一次 🌱",
+  "没关系，这题本来就爱挖坑。把解析读一遍，再做一次 🌱",
+  "对了一半！红框那几步的解析读一读，再来一次 ✍️",
+  "只差一步～看看那一步的解析就稳了 💪",
+  "全对！露出来的面你已经数得清清楚楚了 🎉",
+];
+
+const grid = document.getElementById("steps");
+const bar = document.getElementById("revealBar");
+const barMsg = document.getElementById("barMsg");
+const finish = document.getElementById("finish");
+let done = 0, hit = 0;
+
+function buildSteps() {
+  grid.replaceChildren();
+  done = 0; hit = 0;
+  barMsg.innerHTML = `还剩 <b>${STEPS.length}</b> 步没做`;
+  bar.hidden = false;
+  finish.hidden = true;
+  // 重做时把上一轮解开的终答一起清掉 —— 光藏起来不够，文字还留在页面里
+  for (const id of ["bigAns", "finWhy", "score", "cheer", "stars"]) document.getElementById(id).textContent = "";
+  put("helper", { color: "var(--grape)", mood: "happy", size: 50 });
+
+  STEPS.forEach((spec, i) => {
+    const card = document.createElement("div");
+    card.className = "q-card";
+    card.innerHTML = `<header><span class="id">${i + 1}</span><span class="verdict" hidden></span></header>` +
+      `<p class="q">${spec.q}</p>`;
+
+    const choice = document.createElement("div");
+    choice.className = "choice";
+    choice.innerHTML = '<span class="ask">你选：</span>' +
+      spec.opts.map(o => `<button type="button" data-v="${o}">${o}</button>`).join("");
+
+    const why = document.createElement("p");     // 解析锁着，选了才解码填进去
+    why.className = "why";
+    why.hidden = true;
+
+    card.append(choice, why);
+    grid.append(card);
+
+    const rec = { spec, card, choice, why, pick: null };
+    choice.addEventListener("click", e => {
+      const b = e.target.closest("button");
+      if (!b || rec.pick !== null) return;         // 一步只选一次
+      rec.pick = b.dataset.v;
+      settle(rec);
+    });
+  });
+}
+
+function settle(rec) {
+  const { spec, card, choice, why } = rec;
+  const a = dec(spec.k);                           // 到这一步才解开答案
+  const right = rec.pick === a.ans;
+
+  card.classList.add(right ? "good" : "bad", right ? "hit" : "miss");
+  const v = card.querySelector(".verdict");
+  v.textContent = right ? "答对啦 ✓" : "再想想";
+  v.hidden = false;
+
+  for (const b of choice.querySelectorAll("button")) {
+    b.disabled = true;
+    if (b.dataset.v === a.ans) b.classList.add("is-ans");
+    else if (b.dataset.v === rec.pick) b.classList.add("is-miss");
+  }
+  why.innerHTML = a.why;
+  why.hidden = false;
+  if (right) burst(v);
+  put("helper", { color: "var(--grape)", mood: right ? "wow" : "hmm", size: 50 });
+
+  done++; if (right) hit++;
+  barMsg.innerHTML = done === STEPS.length ? "四步都做完啦" : `还剩 <b>${STEPS.length - done}</b> 步没做`;
+  if (done === STEPS.length) {
+    const f = dec(FIN);
+    document.getElementById("bigAns").textContent = f.big;
+    document.getElementById("finWhy").textContent = f.why;
+    document.getElementById("score").textContent = `四步你做对了 ${hit} 步`;
+    document.getElementById("stars").innerHTML =
+      STEPS.map((_, k) => `<span class="${k < hit ? "on" : "off"}">★</span>`).join("");
+    document.getElementById("cheer").textContent = CHEER[hit];
+    put("finPal", { color: "var(--cut)", mood: hit >= 2 ? "wow" : "hmm", size: 88 });
+    bar.hidden = true;
+    finish.hidden = false;
+    finish.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "center" });
+    setTimeout(() => burst(document.getElementById("bigAns"), 36), reduceMotion ? 0 : 350);
+  }
+}
+
+document.getElementById("retry").addEventListener("click", () => {
+  buildSteps();
+  grid.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
+});
+buildSteps();
+</script>
+</body>
+</html>
