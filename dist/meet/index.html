@@ -4,138 +4,55 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>相遇两次合走几条路</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Serif:wght@500;600&display=swap">
-<link rel="stylesheet" href="../base.css?v=2">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=ZCOOL+KuaiLe&display=swap" media="print" onload="this.media='all'">
+<link rel="stylesheet" href="../base.css?v=3">
 <style>
-/* 这条必须留在页面自己的 style 里，理由同 cube/index.html：
-   外链 CSS 被缓存时，设了 display 的元素会顶掉 hidden，答案就露出来了。 */
+/* 这条必须留在页面自己的 style 里：外链 CSS 被缓存时，
+   设了 display 的元素会顶掉 hidden，答案就露出来了。 */
 [hidden]{display:none !important}
 
-/* 小团子的五官是插画用色，不跟主题翻转：暗色模式下眼白仍是白、瞳孔仍是深色。
-   主题色（身体、旗子、按钮）一律走 base.css 的变量。 */
-.eye-w{fill:#FFFFFF}
-.eye-p{fill:#1B2430}
-.blush{fill:#FF8FA0; opacity:.6}
-.mouth{fill:none; stroke:#1B2430; stroke-width:1.5; stroke-linecap:round}
-.shine{fill:#FFFFFF; opacity:.3}
-
-.cute{font-family:"PingFang SC","Hiragino Sans GB","Microsoft YaHei","Noto Sans CJK SC",sans-serif}
-
 /* 路面动画 */
-.stage{display:flex; flex-direction:column; gap:22px}
+.stage{display:flex; flex-direction:column; gap:22px; background:linear-gradient(180deg, var(--sky-soft), transparent 58%), var(--card)}
 .stage svg{width:100%; height:auto; display:block; overflow:visible}
-.stage .end{font-family:"IBM Plex Mono",ui-monospace,monospace; font-size:22px; font-weight:600; fill:var(--ink)}
-.stage .name{font-size:12.5px; font-weight:700; fill:var(--ink)}
-.stage .pin{font-size:14px; fill:var(--ink-3)}
-.stage .bang{font-size:17px; font-weight:800; fill:var(--ink)}
+.stage .end{font-family:var(--f-num); font-size:24px; font-weight:700; fill:var(--ink)}
+.stage .pin{font-size:14px; font-weight:700; fill:var(--ink-3); font-family:var(--f-body)}
+.stage .bang{font-size:18px; font-weight:800; fill:var(--ink); font-family:var(--f-title)}
 .panel{display:grid; grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:clamp(18px,3vw,34px); align-items:start}
 @media (max-width:680px){.panel{grid-template-columns:1fr}}
 .controls{display:flex; flex-direction:column; gap:16px}
-input[type=range]{width:100%; accent-color:var(--cut); margin:0; cursor:pointer}
-.scale{position:relative; height:20px; margin-top:4px; font-size:12px; color:var(--ink-3)}
+.scale{position:relative; height:22px; margin-top:6px; font-size:12.5px; font-weight:700; color:var(--ink-3)}
 .scale span{position:absolute; top:3px; white-space:nowrap}
 .scale .s0{left:0}
 .scale .s1{left:33.33%; transform:translateX(-50%)}
 .scale .s3{right:0}
 .gauge{display:flex; flex-direction:column; gap:10px}
-.big-num{font-size:clamp(24px,4vw,32px); font-weight:700; color:var(--cut); line-height:1.25}
-.big-num em{display:block; font-style:normal; font-size:13px; color:var(--ink-3); font-weight:500; margin-bottom:4px}
-.big-num span{font-family:"IBM Plex Serif",Georgia,serif; font-size:1.25em; font-variant-numeric:tabular-nums}
-.parts{margin:0; font-size:13.5px; color:var(--ink-2); font-variant-numeric:tabular-nums}
-.bubble{position:relative; margin:4px 0 0; padding:12px 14px; font-size:14.5px; line-height:1.6; color:var(--ink);
-  background:var(--cut-fill); border-radius:14px; min-height:3.6em}
-.bubble::before{content:""; position:absolute; top:-7px; left:22px; border:7px solid transparent;
-  border-top:0; border-bottom-color:var(--cut-fill)}
-.bubble b{font-weight:700}
+.big-num{font-size:clamp(22px,3.6vw,28px); font-weight:800; color:var(--ink); line-height:1.25}
+.big-num em{display:block; font-style:normal; font-size:13.5px; color:var(--ink-3); font-weight:700; margin-bottom:2px}
+.big-num span{font-family:var(--f-num); font-size:1.9em; font-weight:700; color:var(--cut); font-variant-numeric:tabular-nums; vertical-align:-.08em}
+.parts{margin:0; font-size:14px; font-weight:600; color:var(--ink-2); font-variant-numeric:tabular-nums}
+.parts .ja{color:color-mix(in srgb, var(--cut) 75%, var(--ink))}
+.parts .yi{color:color-mix(in srgb, var(--ok) 75%, var(--ink))}
 
-/* 胶囊按钮：速度比、播放、四步选项、再做一遍 */
-.pills, .choice{display:flex; flex-wrap:wrap; align-items:center; gap:8px}
-.pills .ask, .choice .ask{font-size:13px; color:var(--ink-3); margin-right:2px}
-.pills button, .choice button{
-  font:inherit; font-size:14px; font-weight:700; color:var(--ink-2);
-  background:var(--card); border:2px solid var(--edge); border-radius:999px;
-  padding:.36em 1.1em; cursor:pointer; font-variant-numeric:tabular-nums;
-  box-shadow:0 2px 0 var(--edge);
-  transition:border-color .12s, color .12s, background .12s, transform .08s, box-shadow .08s;
-}
-.pills button:hover, .choice button:not(:disabled):hover{border-color:var(--cut); color:var(--cut)}
-.pills button:active, .choice button:not(:disabled):active{transform:translateY(2px); box-shadow:0 0 0 var(--edge)}
-.pills button[aria-pressed="true"]{border-color:var(--cut); color:var(--cut); background:var(--cut-fill); box-shadow:0 2px 0 var(--cut)}
-.pills .go{color:var(--card); background:var(--cut); border-color:var(--cut); box-shadow:0 2px 0 color-mix(in srgb, var(--cut) 70%, #000)}
-.pills .go:hover{color:var(--card); filter:brightness(1.06)}
-.choice button:disabled{cursor:default; box-shadow:none}
-.choice button:disabled:not(.is-ans):not(.is-miss){opacity:.4}
-.choice button.is-ans{border-color:var(--ok); color:var(--ok); background:var(--ok-soft)}
-.choice button.is-miss{border-color:var(--no); color:var(--no); background:var(--no-soft); text-decoration:line-through}
-
-/* 看出门道了吗 */
-.rules{display:grid; grid-template-columns:repeat(auto-fit,minmax(260px,1fr)); gap:16px}
-.rule{background:var(--card); border:1px solid var(--edge); border-radius:16px; padding:20px;
-  display:flex; flex-direction:column; gap:12px; box-shadow:var(--shadow)}
-.rule svg{width:100%; height:auto; display:block}
-.rule svg text{font-size:13px; fill:var(--ink-2)}
-.rule h3{margin:0; font-size:17px; font-weight:700; line-height:1.45; text-wrap:balance}
-.rule p{margin:0; font-size:14px; color:var(--ink-2); line-height:1.75}
-.rule p b{color:var(--ink); font-weight:700}
-.rule .tag{align-self:flex-start; font-size:12px; font-weight:700; color:var(--cut);
-  background:var(--cut-fill); padding:.2em .8em; border-radius:999px}
-
-/* 轮到你啦 */
-.steps{display:grid; grid-template-columns:repeat(auto-fit,minmax(300px,1fr)); gap:16px}
-.step{background:var(--card); border:2px solid var(--edge); border-radius:16px; padding:18px 18px 20px;
-  display:flex; flex-direction:column; gap:12px; box-shadow:var(--shadow)}
-.step.good{border-color:color-mix(in srgb, var(--ok) 55%, var(--edge)); animation:pop .45s ease}
-.step.bad{border-color:color-mix(in srgb, var(--no) 60%, var(--edge)); animation:shake .42s ease}
-@keyframes pop{0%{transform:scale(1)}40%{transform:scale(1.035)}100%{transform:scale(1)}}
-@keyframes shake{0%,100%{transform:translateX(0)}20%{transform:translateX(-7px)}40%{transform:translateX(6px)}60%{transform:translateX(-4px)}80%{transform:translateX(3px)}}
-.step header{display:flex; align-items:center; justify-content:space-between; gap:12px}
-.step .id{display:grid; place-items:center; width:34px; height:34px; border-radius:50%;
-  font-family:"IBM Plex Serif",Georgia,serif; font-size:18px; font-weight:600; line-height:1;
-  color:var(--cut); background:var(--cut-fill)}
-.step .q{margin:0; font-size:16px; font-weight:700; line-height:1.6; text-wrap:balance}
-.verdict{font-size:13px; font-weight:700; padding:.28em .9em; border-radius:999px}
-.good .verdict{color:var(--ok); background:var(--ok-soft)}
-.bad .verdict{color:var(--no); background:var(--no-soft)}
-.why{margin:0; font-size:14px; line-height:1.8; color:var(--ink-2)}
-.why b{color:var(--ink); font-weight:700}
-
-.finish{display:flex; flex-wrap:wrap; align-items:center; gap:clamp(16px,3vw,34px);
-  background:var(--card); border:2px solid color-mix(in srgb, var(--ok) 45%, var(--edge));
-  border-radius:20px; padding:clamp(20px,3.4vw,32px); box-shadow:var(--shadow)}
-.finish .big{font-family:"IBM Plex Serif",Georgia,serif; font-size:clamp(40px,9vw,68px);
-  font-weight:600; line-height:1; letter-spacing:.02em; color:var(--ok)}
-.fin-side{display:flex; flex-direction:column; gap:8px; flex:1 1 280px}
-.stars{font-size:clamp(26px,5vw,32px); letter-spacing:.1em; line-height:1}
-.stars .on{color:var(--cut)}
-.stars .off{color:var(--edge)}
-.score{margin:0; font-size:15px; font-weight:700; color:var(--ink)}
-.cheer{margin:0; font-size:15px; color:var(--ink)}
-.finish .fin-why{margin:0; color:var(--ink-2); font-size:14.5px; line-height:1.75}
-.reveal-bar{display:flex; flex-wrap:wrap; align-items:center; gap:14px; margin-top:18px}
-.reveal-bar p{margin:0; font-size:14px; color:var(--ink-3); font-variant-numeric:tabular-nums}
-.reveal-bar p b{color:var(--ink); font-weight:700}
-
-/* 答对撒彩纸 */
-.confetti{position:absolute; width:8px; height:11px; border-radius:2px; pointer-events:none; z-index:50;
-  animation:fly .95s cubic-bezier(.2,.7,.3,1) forwards}
-@keyframes fly{
-  0%{transform:translate(-50%,-50%) rotate(0); opacity:1}
-  100%{transform:translate(calc(-50% + var(--dx)), calc(-50% + var(--dy))) rotate(var(--rot)); opacity:0}
-}
+.finish .fin-pal{align-self:center}
 </style>
 </head>
-<body class="cute">
+<body>
 <main>
   <header class="head">
-    <p class="back"><a href="../">← 初中图解</a></p>
-    <p class="eyebrow">行程问题 · 两次相遇</p>
-    <h1>相遇两次，两人合起来走了几条路</h1>
-    <p class="lede">题目：甲、乙从 A、B 两地同时出发相向而行，乙的速度是甲的 3/4。相遇后继续走，各自到达终点后立即原路返回。已知第二次相遇点距第一次相遇点 60 千米，求 A、B 两地相距多少千米？</p>
+    <p class="back"><a href="../">← 回到初中图解</a></p>
+    <p class="eyebrow">🏃 行程问题 · 两次相遇</p>
+    <h1>相遇两次，两人合起来<span class="hl">走了几条路</span></h1>
+    <div class="problem">
+      <span class="problem-tag">📝 题目</span>
+      <p>甲、乙从 A、B 两地同时出发相向而行，乙的速度是甲的 3/4。相遇后继续走，各自到达终点后立即原路返回。已知第二次相遇点距第一次相遇点 60 千米，求 A、B 两地相距多少千米？</p>
+    </div>
   </header>
 
   <section>
     <h2><span class="n">01</span>放它们去走一走</h2>
-    <p class="sub">先换几种速度随便试。拖时间轴或点播放，盯住右边那个数：<b>每次碰面的时候，两个人合起来走了几条路？</b></p>
+    <p class="sub">先换几种速度随便试。拖时间轴或点播放，盯住那个大数字：<b>每次碰面的时候，两个人合起来走了几条路？</b></p>
     <div class="slab stage">
       <svg id="road" viewBox="0 0 720 290" role="img" aria-label="甲从 A、乙从 B 出发，在两地之间来回走"></svg>
       <div class="panel">
@@ -158,23 +75,23 @@ input[type=range]{width:100%; accent-color:var(--cut); margin:0; cursor:pointer}
         <div class="gauge">
           <div class="big-num"><em>两个人合起来走了</em><span id="roads">0</span> 条路</div>
           <p class="parts" id="parts"></p>
-          <p class="bubble" id="hint" aria-live="polite"></p>
+          <div class="talk"><span class="mascot" id="guide"></span><p class="bubble" id="hint" aria-live="polite"></p></div>
         </div>
       </div>
     </div>
   </section>
 
   <section>
-    <h2><span class="n">02</span>看出门道了吗</h2>
+    <h2><span class="n sky">02</span>看出门道了吗</h2>
     <p class="sub">不管上面换成什么速度，碰面那一刻总有这两条。</p>
     <div class="rules">
-      <div class="rule">
+      <div class="rule sky">
         <span class="tag">门道 1</span>
         <div id="ruleA"></div>
         <h3>时间一样，路程比 = 速度比</h3>
         <p>同时出发、同时碰面，两个人走的<b>时间一样长</b>。谁快谁就多走：速度 3 : 2，走的路就是 3 份对 2 份。</p>
       </div>
-      <div class="rule">
+      <div class="rule pink">
         <span class="tag">门道 2</span>
         <div id="ruleB"></div>
         <h3>碰一次合走 1 条，碰两次合走 3 条</h3>
@@ -184,36 +101,33 @@ input[type=range]{width:100%; accent-color:var(--cut); margin:0; cursor:pointer}
   </section>
 
   <section>
-    <h2><span class="n">03</span>轮到你啦</h2>
+    <h2><span class="n grape">03</span>轮到你啦</h2>
     <p class="sub">回到这道题：乙的速度是甲的 3/4，两个碰面点差 60 千米。<b>每一步先自己选</b>，点下去才揭晓～</p>
-    <div class="steps" id="steps"></div>
+    <div class="q-grid" id="steps"></div>
     <div class="reveal-bar" id="revealBar">
+      <span class="mascot" id="helper"></span>
       <p id="barMsg">还剩 <b>4</b> 步没做</p>
     </div>
   </section>
 
   <section class="finish" id="finish" hidden>
+    <span class="mascot bob fin-pal" id="finPal"></span>
     <div class="big" id="bigAns"></div>
     <div class="fin-side">
       <div class="stars" id="stars" aria-hidden="true"></div>
       <p class="score" id="score"></p>
       <p class="cheer" id="cheer"></p>
       <p class="fin-why" id="finWhy"></p>
-      <div class="pills"><button type="button" id="retry">再做一遍 ↺</button></div>
+      <div class="pills"><button type="button" class="go" id="retry">再做一遍 ↺</button></div>
     </div>
   </section>
 </main>
 
+<script src="../kit.js?v=1"></script>
 <script>
-const NS = "http://www.w3.org/2000/svg";
-const el = (tag, attrs = {}, text) => {
-  const e = document.createElementNS(NS, tag);
-  for (const k in attrs) e.setAttribute(k, attrs[k]);
-  if (text != null) e.textContent = text;
-  return e;
-};
+const { el, dec, burst, critter, mascot, reduceMotion } = Kit;
 const fmt = x => Math.abs(x - Math.round(x)) < 0.005 ? String(Math.round(x)) : x.toFixed(2);
-const reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const put = (id, m) => document.getElementById(id).replaceChildren(mascot(m));
 
 /* ---------- 1. 路面动画 ----------
    把一条路记作 VA + VB 份，两人合起来每个时间单位正好走一条路，
@@ -222,47 +136,34 @@ const road = document.getElementById("road");
 const slider = document.getElementById("tSlider");
 const playBtn = document.getElementById("play");
 const ROADY = 136, LANE_A = 72, LANE_B = 206, S = 1.45, EPS = 0.004;
-let VA = 3, VB = 2, t = 0;
+let VA = 3, VB = 2, t = 0, guideMood = "";
 
 const bounce = (d, L) => { const m = d % (2 * L); return m <= L ? m : 2 * L - m; };
 const heading = (d, L) => (d % (2 * L)) < L ? 1 : -1;
 
-// 一个小团子。dist 是它已经走过的路，用来算走路时一颠一颠的节奏 —— 拖时间轴也会跟着颠。
-function critter(x, y, name, color, dir, dist) {
+function walker(x, y, name, color, dir, dist, meeting) {
   const phase = dist * Math.PI * 1.7;
-  const bob = reduceMotion ? 0 : Math.abs(Math.sin(phase)) * 3.2 * S;
-  const lift = reduceMotion ? 0 : Math.sin(phase);
+  const bob = reduceMotion || meeting ? 0 : Math.abs(Math.sin(phase)) * 3.2 * S;
   road.append(el("ellipse", { cx: x, cy: y + 18 * S, rx: (13 - bob * .5) * S, ry: 3.2 * S, fill: "var(--ink)", opacity: .1 }));
-  const g = el("g", { transform: `translate(${x} ${y - bob}) scale(${S})` });
-  g.append(el("ellipse", { cx: -6, cy: 14 - (lift > 0 ? 2 : 0), rx: 4.6, ry: 3.2, fill: color }));
-  g.append(el("ellipse", { cx: 6, cy: 14 - (lift < 0 ? 2 : 0), rx: 4.6, ry: 3.2, fill: color }));
-  g.append(el("circle", { cx: 0, cy: 0, r: 15.5, fill: color }));
-  g.append(el("ellipse", { cx: -5, cy: -8, rx: 5, ry: 3.2, class: "shine" }));
-  for (const ex of [-5.2, 5.2]) {
-    g.append(el("circle", { cx: ex, cy: -2, r: 3.8, class: "eye-w" }));
-    g.append(el("circle", { cx: ex + dir * 1.5, cy: -1.5, r: 2, class: "eye-p" }));
-  }
-  g.append(el("ellipse", { cx: -10, cy: 4.5, rx: 2.8, ry: 1.7, class: "blush" }));
-  g.append(el("ellipse", { cx: 10, cy: 4.5, rx: 2.8, ry: 1.7, class: "blush" }));
-  g.append(el("path", { d: "M -3.2 5.2 Q 0 8.4 3.2 5.2", class: "mouth" }));
-  g.append(el("text", { x: 0, y: -23, "text-anchor": "middle", class: "name" }, name));
+  const g = critter({ color, name, look: dir, mood: meeting ? "wow" : "happy", step: reduceMotion ? 0 : Math.sin(phase) });
+  g.setAttribute("transform", `translate(${x} ${y - bob}) scale(${S})`);
   road.append(g);
 }
 
 function flag(x, label, color, side) {
-  road.append(el("line", { x1: x, y1: ROADY, x2: x, y2: ROADY - 46, stroke: "var(--ink-3)", "stroke-width": 2.4, "stroke-linecap": "round" }));
-  road.append(el("path", { d: `M ${x} ${ROADY - 46} L ${x + side * 24} ${ROADY - 38} L ${x} ${ROADY - 30} Z`, fill: color }));
-  road.append(el("text", { x: x - side * 40, y: ROADY + 7, "text-anchor": "middle", class: "end" }, label));
+  road.append(el("line", { x1: x, y1: ROADY, x2: x, y2: ROADY - 46, stroke: "var(--ink-3)", "stroke-width": 2.6, "stroke-linecap": "round" }));
+  road.append(el("path", { d: `M ${x} ${ROADY - 46} L ${x + side * 26} ${ROADY - 38} L ${x} ${ROADY - 30} Z`, fill: color }));
+  road.append(el("text", { x: x - side * 40, y: ROADY + 8, "text-anchor": "middle", class: "end" }, label));
 }
 
 function bang(x) {
   const pts = [];
-  for (let i = 0; i < 16; i++) {
-    const r = i % 2 ? 11 : 25, a = (i / 16) * Math.PI * 2 - Math.PI / 2;
+  for (let i = 0; i < 18; i++) {
+    const r = i % 2 ? 12 : 27, a = (i / 18) * Math.PI * 2 - Math.PI / 2;
     pts.push(`${x + Math.cos(a) * r},${ROADY + Math.sin(a) * r}`);
   }
-  road.append(el("polygon", { points: pts.join(" "), fill: "var(--cut-fill)", stroke: "var(--cut)", "stroke-width": 1.6, "stroke-linejoin": "round" }));
-  road.append(el("text", { x, y: ROADY + 6, "text-anchor": "middle", class: "bang" }, "碰!"));
+  road.append(el("polygon", { points: pts.join(" "), fill: "var(--lemon)", stroke: "var(--cut)", "stroke-width": 2, "stroke-linejoin": "round" }));
+  road.append(el("text", { x, y: ROADY + 6.5, "text-anchor": "middle", class: "bang" }, "碰!"));
 }
 
 function render() {
@@ -274,42 +175,43 @@ function render() {
   road.replaceChildren();
 
   road.append(el("line", { x1: X0, y1: ROADY, x2: X1, y2: ROADY,
-    stroke: "var(--pencil)", "stroke-width": 7, "stroke-linecap": "round", opacity: .55 }));
+    stroke: "var(--pencil)", "stroke-width": 12, "stroke-linecap": "round", opacity: .7 }));
   road.append(el("line", { x1: X0, y1: ROADY, x2: X1, y2: ROADY,
-    stroke: "var(--card)", "stroke-width": 1.6, "stroke-dasharray": "7 8" }));
+    stroke: "var(--card)", "stroke-width": 2.4, "stroke-dasharray": "9 9", "stroke-linecap": "round" }));
   for (let i = 1; i < L; i++)
-    road.append(el("circle", { cx: X(i), cy: ROADY, r: 2.4, fill: "var(--ink-3)" }));
+    road.append(el("circle", { cx: X(i), cy: ROADY, r: 3, fill: "var(--ink-3)" }));
   flag(X0, "A", "var(--cut)", 1);
   flag(X1, "B", "var(--ok)", -1);
 
   const pin = (p, label, dy) => {
     road.append(el("line", { x1: X(p), y1: LANE_A - 48, x2: X(p), y2: LANE_B + 36,
-      stroke: "var(--ink-3)", "stroke-width": 1.2, "stroke-dasharray": "3 5" }));
-    road.append(el("text", { x: X(p), y: LANE_B + 58 + dy, "text-anchor": "middle", class: "pin" }, label));
+      stroke: "var(--ink-3)", "stroke-width": 1.4, "stroke-dasharray": "3 6", "stroke-linecap": "round" }));
+    road.append(el("text", { x: X(p), y: LANE_B + 60 + dy, "text-anchor": "middle", class: "pin" }, label));
   };
   if (t >= 1 - EPS) pin(VA, "① 第一次碰面", 0);
   if (t >= 3 - EPS) pin(2 * L - 3 * VA, "② 第二次碰面", 20);
 
-  critter(X(bounce(VA * t, L)), LANE_A, "甲", "var(--cut)", heading(VA * t, L), VA * t);
-  critter(X(L - bounce(VB * t, L)), LANE_B, "乙", "var(--ok)", -heading(VB * t, L), VB * t);
-
+  const meeting = Math.abs(t - 1) < EPS || Math.abs(t - 3) < EPS;
+  walker(X(bounce(VA * t, L)), LANE_A, "甲", "var(--cut)", heading(VA * t, L), VA * t, meeting);
+  walker(X(L - bounce(VB * t, L)), LANE_B, "乙", "var(--ok)", -heading(VB * t, L), VB * t, meeting);
   if (Math.abs(t - 1) < EPS) bang(X(VA));
   if (Math.abs(t - 3) < EPS) bang(X(2 * L - 3 * VA));
 
   document.getElementById("roads").textContent = fmt(t);
-  document.getElementById("parts").textContent =
-    `甲走了 ${fmt(VA * t)} 份，乙走了 ${fmt(VB * t)} 份（一条路 = ${L} 份）`;
+  document.getElementById("parts").innerHTML =
+    `<span class="ja">甲走了 ${fmt(VA * t)} 份</span>，<span class="yi">乙走了 ${fmt(VB * t)} 份</span>（一条路 = ${L} 份）`;
 
   const tA = L / VA, tB = L / VB;
-  let h;
+  let h, mood = "happy";
   if (t < 1 - EPS) h = "两个小团子面对面出发啦，还没碰上～";
-  else if (t < 1 + EPS) h = "<b>碰！第一次碰面 🎉</b> 合起来正好走满 <b>1 条路</b>。";
-  else if (t < Math.min(tA, tB) - EPS) h = "打完招呼各走各的，继续朝对面的尽头冲。";
+  else if (t < 1 + EPS) { h = "<b>碰！第一次碰面 🎉</b> 合起来正好走满 <b>1 条路</b>。"; mood = "wow"; }
+  else if (t < Math.min(tA, tB) - EPS) h = "打完招呼各走各的，继续朝对面的尽头冲！";
   else if (t < Math.max(tA, tB) - EPS)
     h = tA < tB ? "甲先到 B，掉头往回走；乙还在往 A 赶。" : "乙先到 A，掉头往回走；甲还在往 B 赶。";
-  else if (t < 3 - EPS) h = "两个都掉过头了，又面对面走过来～";
-  else h = "<b>碰！第二次碰面 🎉</b> 合起来走满了 <b>3 条路</b>，每个人走的也正好是第一次的 3 倍。";
+  else if (t < 3 - EPS) { h = "两个都掉过头了，又面对面走过来……会在哪碰上呢？"; mood = "hmm"; }
+  else { h = "<b>碰！第二次碰面 🎉</b> 合起来走满了 <b>3 条路</b>，每个人走的也正好是第一次的 3 倍。"; mood = "wow"; }
   document.getElementById("hint").innerHTML = h;
+  if (mood !== guideMood) { put("guide", { color: "var(--sky)", mood, look: 1, size: 58 }); guideMood = mood; }
 }
 
 const RATE = 0.5;                                  // 每秒走半条路，整段 6 秒
@@ -357,30 +259,28 @@ render();
 
 /* ---------- 2. 门道小图 ---------- */
 (() => {
-  const s = el("svg", { viewBox: "0 0 300 74" });
+  const s = el("svg", { viewBox: "0 0 300 76" });
   const x0 = 12, w = 276, u = w / 5;
   for (let i = 0; i < 5; i++)
-    s.append(el("rect", { x: x0 + i * u + 2, y: 8, width: u - 4, height: 28, rx: 8,
+    s.append(el("rect", { x: x0 + i * u + 2.5, y: 8, width: u - 5, height: 30, rx: 10,
       fill: i < 3 ? "var(--cut-fill)" : "var(--ok-soft)",
-      stroke: i < 3 ? "var(--cut)" : "var(--ok)", "stroke-width": 1.6 }));
-  s.append(el("text", { x: x0 + 1.5 * u, y: 60, "text-anchor": "middle" }, "甲 3 份"));
-  s.append(el("text", { x: x0 + 4 * u, y: 60, "text-anchor": "middle" }, "乙 2 份"));
+      stroke: i < 3 ? "var(--cut)" : "var(--ok)", "stroke-width": 2 }));
+  s.append(el("text", { x: x0 + 1.5 * u, y: 64, "text-anchor": "middle", fill: "var(--ink-2)", "font-size": 14, "font-weight": 700 }, "甲 3 份"));
+  s.append(el("text", { x: x0 + 4 * u, y: 64, "text-anchor": "middle", fill: "var(--ink-2)", "font-size": 14, "font-weight": 700 }, "乙 2 份"));
   document.getElementById("ruleA").append(s);
 })();
 (() => {
-  const s = el("svg", { viewBox: "0 0 300 108" });
+  const s = el("svg", { viewBox: "0 0 300 112" });
   ["走到第一次碰面", "各自走到尽头", "折回来再碰面"].forEach((label, i) => {
-    const y = 4 + i * 34;
-    s.append(el("rect", { x: 12, y, width: 276, height: 26, rx: 13,
-      fill: "var(--cut-fill)", stroke: "var(--cut)", "stroke-width": 1.6 }));
-    s.append(el("text", { x: 26, y: y + 18 }, `第 ${i + 1} 条 · ${label}`));
+    const y = 4 + i * 36;
+    s.append(el("rect", { x: 12, y, width: 276, height: 28, rx: 14,
+      fill: "var(--pink-soft)", stroke: "var(--pink)", "stroke-width": 2 }));
+    s.append(el("text", { x: 28, y: y + 19.5, fill: "var(--ink-2)", "font-size": 14, "font-weight": 700 }, `第 ${i + 1} 条 · ${label}`));
   });
   document.getElementById("ruleB").append(s);
 })();
 
 /* ---------- 3. 轮到你啦 ---------- */
-// 答案和解析是 base64 的 —— 源码里不留明文，免得直接抄。
-// 要改的话先解开：python3 -c "import base64;print(base64.b64decode('...').decode())"
 const STEPS = [
   { q: "第一次碰面时，甲走了全程的几分之几？", opts: ["1/2", "3/7", "4/7", "3/4"], k: "eyJhbnMiOiAiNC83IiwgIndoeSI6ICLkuZnnmoTpgJ/luqbmmK/nlLLnmoQgMy8077yM5o2i5oiQ5q+U5bCx5pivIDxiPueUsiA6IOS5mSA9IDQgOiAzPC9iPuOAguS4pOS6uuWQjOaXtuWHuuWPkeOAgeWQjOaXtueisOmdou+8jOaXtumXtOS4gOagt++8jOi1sOeahOi3r+S5i+avlOS5n+aYryA0IDogM+OAguS4gOadoei3r+WIh+aIkCA0ICsgMyA9IDcg5Lu977yM55Sy5Y2gIDQg5Lu977yM5pivIDxiPjQvNzwvYj7jgILpgIkgMy80IOaYr+aKiumAn+W6puavlOebtOaOpeW9k+aIkOS6hui3r+eahOWHoOWIhuS5i+WHoO+8mzMvNyDmmK/kuZnotbDnmoTjgIIifQ==" },
   { q: "第二次碰面时，两人合起来一共走了几条路？", opts: ["2 条", "3 条", "4 条"], k: "eyJhbnMiOiAiMyDmnaEiLCAid2h5IjogIuesrOS4gOasoeeisOmdou+8jOWQiOi1sCA8Yj4xIOadoTwvYj7jgILmjqXnnYDlkIToh6rotbDliLDlr7npnaLlsL3lpLTvvIzlj4jlkIjotbAgMSDmnaHvvJvmipjlm57mnaXlho3norDkuIrvvIzlho3lkIjotbAgMSDmnaHjgILkuIDlhbEgPGI+MyDmnaE8L2I+44CC6YCJIDIg5p2h5piv5pyA5bi46KeB55qE5Z2R77ya5Lul5Li656Kw5Lik5qyh5bCx6LWw5Lik6Laf77yM5ryP5o6J5LqG5Lit6Ze044CM5ZCE6Ieq6LWw5Yiw5aS044CN55qE6YKj5LiA5pW05p2h44CCIn0=" },
@@ -395,32 +295,12 @@ const CHEER = [
   "只差一步～看看那一步的解析就稳了 💪",
   "全对！这一类题你已经拿下了 🎉",
 ];
-const dec = b => JSON.parse(new TextDecoder().decode(Uint8Array.from(atob(b), c => c.charCodeAt(0))));
 
 const grid = document.getElementById("steps");
 const bar = document.getElementById("revealBar");
 const barMsg = document.getElementById("barMsg");
 const finish = document.getElementById("finish");
 let done = 0, hit = 0;
-
-function burst(anchor, n = 18) {
-  if (reduceMotion) return;                        // 关了动画就不撒 —— 否则彩纸不会触发 animationend，一直留在页面上
-  const r = anchor.getBoundingClientRect();
-  const colors = ["var(--cut)", "var(--ok)", "var(--no)", "#FF8FA0", "var(--ink-3)"];
-  for (let i = 0; i < n; i++) {
-    const s = document.createElement("span");
-    s.className = "confetti";
-    s.style.left = (r.left + r.width / 2 + scrollX) + "px";
-    s.style.top = (r.top + r.height / 2 + scrollY) + "px";
-    const a = Math.random() * Math.PI * 2, d = 50 + Math.random() * 90;
-    s.style.setProperty("--dx", Math.cos(a) * d + "px");
-    s.style.setProperty("--dy", Math.sin(a) * d - 36 + "px");
-    s.style.setProperty("--rot", Math.random() * 720 - 360 + "deg");
-    s.style.background = colors[i % colors.length];
-    document.body.append(s);
-    setTimeout(() => s.remove(), 1100);            // 按时长清，不等 animationend：页面切到后台时动画会停，事件就不来
-  }
-}
 
 function buildSteps() {
   grid.replaceChildren();
@@ -430,10 +310,11 @@ function buildSteps() {
   finish.hidden = true;
   // 重做时把上一轮解开的终答一起清掉 —— 光藏起来不够，文字还留在页面里
   for (const id of ["bigAns", "finWhy", "score", "cheer", "stars"]) document.getElementById(id).textContent = "";
+  put("helper", { color: "var(--grape)", mood: "happy", size: 50 });
 
   STEPS.forEach((spec, i) => {
     const card = document.createElement("div");
-    card.className = "step";
+    card.className = "q-card";
     card.innerHTML = `<header><span class="id">${i + 1}</span><span class="verdict" hidden></span></header>` +
       `<p class="q">${spec.q}</p>`;
 
@@ -464,7 +345,7 @@ function settle(rec) {
   const a = dec(spec.k);                           // 到这一步才解开答案
   const right = rec.pick === a.ans;
 
-  card.classList.add(right ? "good" : "bad");
+  card.classList.add(right ? "good" : "bad", right ? "hit" : "miss");
   const v = card.querySelector(".verdict");
   v.textContent = right ? "答对啦 ✓" : "再想想";
   v.hidden = false;
@@ -477,9 +358,10 @@ function settle(rec) {
   why.innerHTML = a.why;
   why.hidden = false;
   if (right) burst(v);
+  put("helper", { color: "var(--grape)", mood: right ? "wow" : "hmm", size: 50 });
 
   done++; if (right) hit++;
-  barMsg.innerHTML = done === STEPS.length ? "四步都做完了" : `还剩 <b>${STEPS.length - done}</b> 步没做`;
+  barMsg.innerHTML = done === STEPS.length ? "四步都做完啦" : `还剩 <b>${STEPS.length - done}</b> 步没做`;
   if (done === STEPS.length) {
     const f = dec(FIN);
     document.getElementById("bigAns").textContent = f.big;
@@ -488,10 +370,11 @@ function settle(rec) {
     document.getElementById("stars").innerHTML =
       STEPS.map((_, k) => `<span class="${k < hit ? "on" : "off"}">★</span>`).join("");
     document.getElementById("cheer").textContent = CHEER[hit];
+    put("finPal", { color: "var(--cut)", mood: hit >= 2 ? "wow" : "hmm", size: 88 });
     bar.hidden = true;
     finish.hidden = false;
     finish.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "center" });
-    setTimeout(() => burst(document.getElementById("bigAns"), 34), reduceMotion ? 0 : 350);
+    setTimeout(() => burst(document.getElementById("bigAns"), 36), reduceMotion ? 0 : 350);
   }
 }
 
