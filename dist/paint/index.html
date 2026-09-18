@@ -41,6 +41,18 @@
 .count span{font-family:var(--f-num); font-size:1.9em; color:var(--grape); font-variant-numeric:tabular-nums; vertical-align:-.08em}
 
 .finish .fin-pal{align-self:center}
+
+/* 01 挪一挪 */
+.scale{display:flex; justify-content:space-between; margin-top:6px; font-size:12.5px; font-weight:700; color:var(--ink-3)}
+.views{display:grid; grid-template-columns:1fr 1fr; gap:12px}
+.view{background:var(--paper); border-radius:14px; padding:8px 8px 10px; text-align:center}
+.view svg{display:block; width:100%; height:auto; max-height:120px}
+.view p{margin:4px 0 0; font-size:13px; font-weight:700; color:var(--ink-2); line-height:1.5}
+.view p b{font-family:var(--f-num); font-size:1.25em; color:var(--grape)}
+.whys{margin:18px 0 0; padding:0; list-style:none; display:grid; grid-template-columns:repeat(auto-fit,minmax(240px,1fr)); gap:14px}
+.whys li{background:var(--card); border:2.5px solid var(--edge); border-radius:var(--r-md); padding:14px 16px; font-size:14.5px; line-height:1.8; color:var(--ink-2)}
+.whys li b{color:var(--ink); font-weight:800}
+.whys li i{display:block; font-style:normal; font-weight:800; color:var(--grape); margin-bottom:2px}
 </style>
 </head>
 <body>
@@ -66,8 +78,37 @@
   </header>
 
   <section>
-    <h2><span class="n">01</span>给积木刷油漆</h2>
-    <p class="sub">拖滑块换第几个积木塔，再点油漆桶，把露在外面的面<b>一个方向一个方向</b>刷上。看不到的背面，点「转一转」绕过去看看。</p>
+    <h2><span class="n">01</span>先把积木挪一挪</h2>
+    <p class="sub">题目图里，每一层都摆在下一层的<b>正中间</b>。拖一下滑块，把每一层往左后角推过去，一边推一边看「上面看」「正面看」两个小窗：<b>露出来的面变没变？</b></p>
+    <div class="slab stage">
+      <div class="tower"><svg id="slideSvg" role="img" aria-label="把积木塔一层层推到角上"></svg></div>
+      <div class="ctl">
+        <div class="pills" id="slideN" role="group" aria-label="第几个积木塔">
+          <button type="button" data-n="2">第②个</button>
+          <button type="button" data-n="3" aria-pressed="true">第③个</button>
+          <button type="button" data-n="4">第④个</button>
+        </div>
+        <div>
+          <input type="range" id="slideT" min="0" max="1" step="0.01" value="0" aria-label="往角上推">
+          <div class="scale" aria-hidden="true"><span>题目的摆法</span><span>推到角上</span></div>
+        </div>
+        <div class="views">
+          <div class="view"><svg id="topView" aria-hidden="true"></svg><p id="topCap"></p></div>
+          <div class="view"><svg id="frontView" aria-hidden="true"></svg><p id="frontCap"></p></div>
+        </div>
+        <div class="talk"><span class="mascot" id="slidePal"></span><p class="bubble" id="slideHint" aria-live="polite"></p></div>
+      </div>
+    </div>
+    <ol class="whys">
+      <li><i>为什么上面不变？</i>上一层是<b>叠在</b>下一层顶上的。挪到哪，挡住下一层顶面的都是它自己那么大一块。所以从上往下看，永远是一整块 <b>n × n</b>。</li>
+      <li><i>为什么侧面不变？</i>侧面只会被<b>同一层</b>挨着的积木挡住。上下两层是叠着的，不是并排挨着，挪一挪谁也挡不着谁。第 k 层每个方向还是露 <b>k</b> 个面。</li>
+      <li><i>那为什么要推到角上？</i>露出来的面一个没多、一个没少，但推到角上以后，每个露出来的面都是<b>完整的一格</b>，数起来整整齐齐。下面就用这个摆法来刷。</li>
+    </ol>
+  </section>
+
+  <section>
+    <h2><span class="n sky">02</span>给积木刷油漆</h2>
+    <p class="sub">这里用的是推到角上的摆法。拖滑块换第几个积木塔，再点油漆桶，把露在外面的面<b>一个方向一个方向</b>刷上。看不到的背面，点「转一转」绕过去看看。</p>
     <div class="slab stage">
       <div class="tower"><svg id="tower" role="img" aria-label="一层一层叠起来的积木塔"></svg></div>
       <div class="ctl">
@@ -94,7 +135,7 @@
   </section>
 
   <section>
-    <h2><span class="n sky">02</span>看出门道了吗</h2>
+    <h2><span class="n grape">03</span>看出门道了吗</h2>
     <p class="sub">不管是第几个积木塔，露出来的面都能分成这三块来数。</p>
     <div class="rules">
       <div class="rule sky">
@@ -119,7 +160,7 @@
   </section>
 
   <section>
-    <h2><span class="n grape">03</span>轮到你啦</h2>
+    <h2><span class="n pink">04</span>轮到你啦</h2>
     <p class="sub">回到这道题。<b>每一步先自己选</b>，点下去才揭晓～</p>
     <div class="q-grid" id="steps"></div>
     <div class="reveal-bar" id="revealBar">
@@ -148,8 +189,8 @@ const put = (id, m) => document.getElementById(id).replaceChildren(mascot(m));
 const CIRCLED = "①②③④⑤⑥";
 
 /* ---------- 积木塔 ----------
-   第 k 层是 k×k，底层 n×n 贴地(z=0)。上面的层压在下面层的同一个角上 ——
-   压在哪个位置都不影响露出面的个数，这里只是为了从默认角度看过去是台阶。
+   第 k 层是 k×k，底层 n×n 贴地(z=0)。slide=0 是题目图里的摆法：每层摆在下一层正中间；
+   slide=1 是推到左后角上。挪到哪露出来的面都一样多（01 段讲为什么），推到角上只是每个面都成整格、好数。
    世界坐标：+y 前、−y 后、−x 左、+x 右、+z 上。 */
 const DIRS = [
   { key: "top",   label: "上面", v: [0, 0, 1],  color: "var(--lemon)" },
@@ -160,42 +201,49 @@ const DIRS = [
 ];
 const dirOf = (dx, dy, dz) => DIRS.find(d => d.v[0] === dx && d.v[1] === dy && d.v[2] === dz);
 
-function tower(n) {
+function tower(n, slide = 1) {
   const cells = [];
-  for (let k = 1; k <= n; k++)
-    for (let x = 0; x < k; x++)
-      for (let y = 0; y < k; y++) cells.push([x, y, n - k]);
-  const has = new Set(cells.map(c => c.join(",")));
+  for (let k = 1; k <= n; k++) {
+    const off = (1 - slide) * (n - k) / 2;
+    for (let i = 0; i < k; i++)
+      for (let j = 0; j < k; j++) cells.push({ k, i, j, x: i + off, y: j + off, z: n - k });
+  }
+  return cells;
+}
+
+// 推到角上以后每块都在整格上，逐块逐面去数哪些面没被别的块贴住
+function exposedCount(n) {
+  const cells = tower(n);
+  const has = new Set(cells.map(c => [c.x, c.y, c.z].join(",")));
   const cnt = {};
   for (const d of DIRS)
-    cnt[d.key] = cells.filter(([x, y, z]) => !has.has([x + d.v[0], y + d.v[1], z + d.v[2]].join(","))).length;
-  return { cells, has, cnt };
+    cnt[d.key] = cells.filter(c => !has.has([c.x + d.v[0], c.y + d.v[1], c.z + d.v[2]].join(","))).length;
+  return cnt;
 }
 
 // 转 r 次 90°：格子和方向用同一个转法
 const rotCell = (x, y, r, n) => [[x, y], [n - 1 - y, x], [n - 1 - x, n - 1 - y], [y, n - 1 - x]][r];
 const rotVec = (dx, dy, r) => [[dx, dy], [-dy, dx], [-dx, -dy], [dy, -dx]][r];
 
-// 等轴测画法：从 (+X,+Y,+Z) 那一侧看过去，每块只画看得到的三个面，由远到近画，近的自然盖住远的
-function drawTower(svg, n, r, painted, W, H, maxS) {
-  const { cells, has } = tower(n);
-  const C30 = Math.cos(Math.PI / 6);
-  const P = (X, Y, Z) => [(X - Y) * C30, (X + Y) * .5 - Z];
-  const view = cells.map(([x, y, z]) => { const [X, Y] = rotCell(x, y, r, n); return { x, y, z, X, Y, Z: z }; });
+// 斜二测，跟课本上的图一样：正面是正方形，往后的棱斜着往右上方缩一半。
+// 看得到上面、前面(+Y)、右面(+X)。先画下层再画上层，同一层里由后往前、由左往右画，近的自然盖住远的。
+const OB = [.5 * Math.cos(Math.PI / 4.5), .5 * Math.sin(Math.PI / 4.5)];
+const P = (X, Y, Z) => [X - Y * OB[0], Y * OB[1] - Z];
 
+function drawTower(svg, n, r, painted, W, H, maxS, slide = 1) {
   let x0 = Infinity, x1 = -Infinity, y0 = Infinity, y1 = -Infinity;
-  for (const c of view)
-    for (const [a, b, h] of [[0, 0, 1], [1, 0, 1], [0, 1, 1], [1, 1, 1], [1, 1, 0], [0, 1, 0], [1, 0, 0]]) {
-      const [px, py] = P(c.X + a, c.Y + b, c.Z + h);
-      x0 = Math.min(x0, px); x1 = Math.max(x1, px); y0 = Math.min(y0, py); y1 = Math.max(y1, py);
-    }
+  for (const X of [0, n]) for (const Y of [0, n]) for (const Z of [0, n]) {   // 按整个 n×n×n 的框定大小，挪动时图不跳
+    const [px, py] = P(X, Y, Z);
+    x0 = Math.min(x0, px); x1 = Math.max(x1, px); y0 = Math.min(y0, py); y1 = Math.max(y1, py);
+  }
   const pad = 12, s = Math.min((W - 2 * pad) / (x1 - x0), (H - 2 * pad) / (y1 - y0), maxS);
   const ox = W / 2 - (x0 + x1) / 2 * s, oy = H / 2 - (y0 + y1) / 2 * s;
   const pt = (X, Y, Z) => { const [px, py] = P(X, Y, Z); return `${(px * s + ox).toFixed(1)},${(py * s + oy).toFixed(1)}`; };
 
   svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
   svg.replaceChildren();
-  view.sort((a, b) => (a.X + a.Y + a.Z) - (b.X + b.Y + b.Z));
+  const view = tower(n, slide).map(c => { const [X, Y] = rotCell(c.x, c.y, r, n); return { ...c, X, Y, Z: c.z }; });
+  view.sort((a, b) => a.Z - b.Z || (a.X + a.Y) - (b.X + b.Y));
   const inv = (4 - r) % 4;
   const sw = Math.max(1, Math.min(1.8, s / 30));
   for (const c of view) {
@@ -207,7 +255,9 @@ function drawTower(svg, n, r, painted, W, H, maxS) {
     ];
     for (const f of faces) {
       const d = dirOf(...f.w);
-      const exposed = !has.has([c.x + f.w[0], c.y + f.w[1], c.z + f.w[2]].join(","));
+      // 侧面只可能被同一层挨着的块贴住；顶面被上一层压住的部分，后画的上一层会盖掉
+      const ni = c.i + f.w[0], nj = c.j + f.w[1];
+      const exposed = f.w[2] === 1 || ni < 0 || nj < 0 || ni >= c.k || nj >= c.k;
       const points = f.poly.map(p => pt(...p)).join(" ");
       if (exposed && painted.has(d.key)) {
         svg.append(el("polygon", { points, fill: d.color, "data-dir": d.key }));
@@ -223,11 +273,63 @@ function drawTower(svg, n, r, painted, W, H, maxS) {
 // 题卡里的 ①②③
 for (let k = 1; k <= 3; k++) {
   const s = el("svg", { role: "img", "aria-label": `第 ${k} 个积木塔` });
-  drawTower(s, k, 0, new Set(), 120, 120, 26);
+  drawTower(s, k, 0, new Set(), 120, 120, 26, 0);
   document.getElementById("fig" + k).append(s);
 }
 
-/* ---------- 1. 刷油漆 ---------- */
+/* ---------- 1. 挪一挪 ---------- */
+(() => {
+  const svgT = document.getElementById("slideSvg"), topV = document.getElementById("topView"), frontV = document.getElementById("frontView");
+  const tIn = document.getElementById("slideT");
+  let n = 3, mood = "";
+  const LAYER = k => `color-mix(in srgb, var(--grape) ${22 + 50 * (k - 1) / Math.max(1, n - 1)}%, var(--card))`;
+
+  // 两个小窗都是正着看的平面图，每层 k×k 画成一格一格；上面看从底层画起，上层盖住下层
+  function views(slide) {
+    const u = 100 / (n + 1), pad = (110 - n * u) / 2;
+    topV.setAttribute("viewBox", "0 0 110 110"); frontV.setAttribute("viewBox", "0 0 110 110");
+    topV.replaceChildren(); frontV.replaceChildren();
+    for (let k = n; k >= 1; k--) {
+      const off = (1 - slide) * (n - k) / 2;
+      for (let i = 0; i < k; i++) {
+        for (let j = 0; j < k; j++)
+          topV.append(el("rect", { x: pad + (i + off) * u, y: pad + (j + off) * u, width: u, height: u,
+            fill: LAYER(k), stroke: "var(--ink)", "stroke-width": 1.2 }));
+        frontV.append(el("rect", { x: pad + (i + off) * u, y: pad + (k - 1) * u, width: u, height: u,
+          fill: LAYER(k), stroke: "var(--ink)", "stroke-width": 1.2 }));
+      }
+    }
+    topV.append(el("rect", { x: pad, y: pad, width: n * u, height: n * u, fill: "none",
+      stroke: "var(--grape)", "stroke-width": 2.6, "stroke-dasharray": "5 4", rx: 2 }));
+  }
+
+  function draw() {
+    const slide = +tIn.value;
+    drawTower(svgT, n, 0, new Set(), 400, 320, 70, slide);
+    views(slide);
+    const sum = n * (n + 1) / 2;
+    document.getElementById("topCap").innerHTML = `上面看：一整块 ${n} × ${n}<br>露 <b>${n * n}</b> 个面`;
+    document.getElementById("frontCap").innerHTML = `正面看：${[...Array(n)].map((_, k) => k + 1).join(" + ")}<br>露 <b>${sum}</b> 个面`;
+    let h, m;
+    if (slide < .02) { h = "这是题目图里的摆法：每一层都<b>摆在下一层正中间</b>。往右拖，把它们推到角上去～"; m = "happy"; }
+    else if (slide > .98) { h = `推到角上啦！上面看还是 <b>${n} × ${n}</b>，正面看还是 <b>${sum}</b> 个——<b>一个面也没多、没少</b>。`; m = "wow"; }
+    else { h = "推着推着……盯住「上面看」「正面看」两个小窗，格子数变了吗？"; m = "hmm"; }
+    document.getElementById("slideHint").innerHTML = h;
+    if (m !== mood) { put("slidePal", { color: "var(--grape)", mood: m, look: 1, size: 58 }); mood = m; }
+  }
+
+  document.getElementById("slideN").addEventListener("click", e => {
+    const b = e.target.closest("button[data-n]");
+    if (!b) return;
+    n = +b.dataset.n;
+    for (const x of document.querySelectorAll("#slideN button")) x.setAttribute("aria-pressed", x === b);
+    draw();
+  });
+  tIn.addEventListener("input", draw);
+  draw();
+})();
+
+/* ---------- 2. 刷油漆 ---------- */
 const towerSvg = document.getElementById("tower");
 const nSlider = document.getElementById("nSlider");
 const bucketBtns = [...document.querySelectorAll("#buckets button")];
@@ -236,7 +338,7 @@ let N = 3, R = 0, guideMood = "";
 
 function refresh() {
   drawTower(towerSvg, N, R, painted, 400, 340, 64);
-  const { cnt } = tower(N);
+  const cnt = exposedCount(N);
   let total = 0;
   for (const b of bucketBtns) {
     const k = b.dataset.d, on = painted.has(k);
@@ -248,8 +350,8 @@ function refresh() {
   document.getElementById("nNow").textContent = CIRCLED[N - 1];
 
   const inv = (4 - R) % 4;
-  const leftSide = dirOf(...rotVec(0, 1, inv), 0).label, rightSide = dirOf(...rotVec(1, 0, inv), 0).label;
-  document.getElementById("facing").textContent = `现在看得到：上面、${leftSide}、${rightSide}`;
+  const facing = dirOf(...rotVec(0, 1, inv), 0).label, side = dirOf(...rotVec(1, 0, inv), 0).label;
+  document.getElementById("facing").textContent = `现在看得到：上面、${facing}（正对着你）、${side}（右手边）`;
 
   const sides = ["front", "back", "left", "right"].filter(k => painted.has(k)).length;
   let h, mood;
@@ -274,7 +376,7 @@ document.getElementById("spin").addEventListener("click", () => { R = (R + 1) % 
 document.getElementById("wipe").addEventListener("click", () => { painted.clear(); refresh(); });
 refresh();
 
-/* ---------- 2. 门道小图 ---------- */
+/* ---------- 3. 门道小图 ---------- */
 (() => {
   const s = el("svg", { viewBox: "0 0 300 124" });
   const u = 30, x0 = 105, y0 = 6;
@@ -313,7 +415,7 @@ refresh();
   document.getElementById("ruleC").append(s);
 })();
 
-/* ---------- 3. 轮到你啦 ---------- */
+/* ---------- 4. 轮到你啦 ---------- */
 const STEPS = [
   { q: "第④个几何体一共用了多少个小立方体？", opts: ["10", "16", "30", "64"], k: "eyJhbnMiOiAiMzAiLCAid2h5IjogIuS7juS4iuW+gOS4i+avj+WxguaYryAxw5cx44CBMsOXMuOAgTPDlzPjgIE0w5c077yM5LiA5YWxIDEgKyA0ICsgOSArIDE2ID0gPGI+MzA8L2I+IOS4quOAgumAiSAxNiDmmK/lj6rmlbDkuobmnIDlupXkuIvkuIDlsYLvvJs2NCDmmK/lvZPmiJDkuoYgNMOXNMOXNCDnmoTlpKfmraPmlrnkvZPvvJsxMCDmmK/miormr4/lsYLlvZPmiJDkuobkuIDmjpLjgIIifQ==" },
   { q: "第②个几何体露出来的小正方形面有几个？（不含底面）", opts: ["7", "12", "16", "20"], k: "eyJhbnMiOiAiMTYiLCAid2h5IjogIuS7juS4iumdoueci+S4i+WOu+aYryAyIMOXIDLvvIzpnLLlh7ogPGI+NDwvYj4g5Liq6Z2i77yb5YmN44CB5ZCO44CB5bem44CB5Y+z5q+P5Liq5pa55ZCR6YO96IO955yL5YiwIDEgKyAyID0gMyDkuKrpnaLvvIzlm5vkuKrmlrnlkJHkuIDlhbEgNCDDlyAzID0gPGI+MTI8L2I+IOS4quOAguWQiOi1t+adpSA0ICsgMTIgPSA8Yj4xNjwvYj4g5Liq44CC6YCJIDcg5piv5Y+q566X5LqG5LiK6Z2i5ZKMPGI+5LiA5LiqPC9iPuS+p+mdou+8jOWPpuWkluS4ieS4quS+p+mdouS5n+mcsuWcqOWklumdou+8mzEyIOaYr+W/mOS6huS4iumdou+8mzIwIOaYr+aKiui0tOWcsOeahOW6lemdouS5n+eul+i/m+WOu+S6huOAgiJ9" },
