@@ -29,6 +29,13 @@
 .net svg{display:block; margin:0 auto; width:100%; max-width:330px; height:auto}
 .bad .why b{color:var(--no)}
 .finish .fin-pal{align-self:center}
+
+/* 02 剪开摊平 */
+.unfold{margin-bottom:22px; background:linear-gradient(180deg, var(--grape-soft), transparent 62%), var(--card)}
+.keys{margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:6px; font-size:14px; font-weight:700; color:var(--ink-2)}
+.keys svg{width:30px; height:14px; vertical-align:-2px; margin-right:8px; display:inline-block}
+.rule .whyline{padding-top:10px; border-top:2px dashed var(--edge)}
+.rule .whyline em{font-style:normal; font-weight:800; color:var(--ink)}
 </style>
 </head>
 <body>
@@ -61,25 +68,44 @@
 
   <section>
     <h2><span class="n sky">02</span>三条规则</h2>
-    <p class="sub">这一刀在每个面上都留下一道痕。把正方体摊平，这六道痕必须<b>同时</b>满足下面三条。</p>
+    <p class="sub">这一刀在每个面上都留下一道痕。三条规则不用背——把正方体<b>沿着棱剪开、摊平</b>看一看，它们自己就冒出来了。拖一下滑块：</p>
+    <div class="slab demo unfold">
+      <div id="foldWrap"></div>
+      <div class="readout">
+        <div>
+          <input type="range" id="fSlider" min="0" max="1" step="0.01" value="0" aria-label="把三个面摊平">
+          <div class="scale" aria-hidden="true"><span>折成正方体</span><span>摊平成展开图</span></div>
+        </div>
+        <ul class="keys">
+          <li><svg viewBox="0 0 30 14"><line x1="2" y1="7" x2="28" y2="7" stroke="var(--cut)" stroke-width="3" stroke-linecap="round"/></svg>刀在每个面上留下的痕</li>
+          <li><svg viewBox="0 0 30 14"><line x1="2" y1="7" x2="28" y2="7" stroke="var(--sky)" stroke-width="3"/><circle cx="15" cy="7" r="4.5" fill="var(--cut)"/></svg>折缝（两个面共用的棱），红点是刀碰到它的地方</li>
+          <li><svg viewBox="0 0 30 14"><line x1="2" y1="7" x2="28" y2="7" stroke="var(--pink)" stroke-width="3" stroke-dasharray="5 4"/></svg>被剪开的那条棱，摊平后分成了两条边</li>
+        </ul>
+        <div class="talk"><span class="mascot" id="foldPal"></span><p class="bubble" id="foldHint" aria-live="polite"></p></div>
+      </div>
+    </div>
+    <p class="sub">摊平以后，这六道痕必须<b>同时</b>满足下面三条：</p>
     <div class="rules">
       <div class="rule sky">
         <span class="tag">规则 1</span>
         <div id="ruleA"></div>
         <h3>每格只是「切掉一个角」</h3>
         <p>那道痕连的是<b>相邻两条边的中点</b>，斜着跨半格。<strong>不是整格的大对角线</strong>。</p>
+        <p class="whyline"><em>怎么来的：</em>正中间那一刀，碰到的都是<b>棱的中点</b>（01 里那六个点）。上面摊开的三格里，每道痕两头都在中点，而且两条棱挨着同一个角，所以正好切掉一个角。</p>
       </div>
       <div class="rule grape">
         <span class="tag">规则 2</span>
         <div id="ruleB"></div>
         <h3>过折缝要「直着穿过去」</h3>
         <p>两格之间若有痕相接，接点必在折缝中点，且摊平后两段<b>连成一条直线</b>。拐回去就接不上。</p>
+        <p class="whyline"><em>怎么来的：</em>两个面本来是折着的，痕在折缝上的红点接上。把滑块拖到「摊平」，三道痕连成了<b>一条笔直的线</b>。因为每道痕切掉的都是一个等腰的小角，跟折缝斜着 45°，两边各斜一次，摊平正好接直。拐回去的那道斜反了，就不是这一刀切出来的。</p>
       </div>
       <div class="rule pink">
         <span class="tag">规则 3</span>
         <div id="ruleC"></div>
         <h3>要么都碰，要么都不碰</h3>
         <p>一条折缝上，两边的痕<b>同时碰</b>或<b>同时躲开</b>。一边碰一边不碰，折起来就断了。</p>
+        <p class="whyline"><em>怎么来的：</em>折缝就是正方体的一条棱，两格<b>共用</b>它。刀碰到这条棱，碰到的那个点两格都有（红点）；没碰到，两格都没有（粉色虚线那条）。</p>
       </div>
     </div>
   </section>
@@ -226,7 +252,72 @@ function update() {
 slider.addEventListener("input", update);
 update();
 
-/* ---------- 2. 三条规则的小图 ---------- */
+/* ---------- 2. 剪开摊平 ----------
+   换一刀同样过正中心的切法 x − y + z = 0.5（也是正六边形），这样迎面看得到的三个面上，痕是连着走的：
+   右面(x=1) → 前面(y=1) → 上面(z=1)。前面不动，右面绕竖着那条棱、上面绕横着那条棱往外翻，翻到和前面齐平。 */
+(() => {
+  const FW = 340, FH = 300;
+  const s = svg(FW, FH);
+  document.getElementById("foldWrap").append(s);
+  const lerp = (a, b, u) => a.map((v, i) => v + (b[i] - v) * u);
+  // 离折缝 d、沿折缝 a 的点，翻开角度 φ（0 折着，90° 摊平）
+  const onR = (a, d, f) => [1 + d * Math.sin(f), 1 - d * Math.cos(f), a];    // 右面：a 是高度 z
+  const onT = (a, d, f) => [a, 1 - d * Math.cos(f), 1 + d * Math.sin(f)];    // 上面：a 是左右 x
+  const onF = (x, z) => [x, 1, z];
+
+  function draw(u) {
+    const f = u * Math.PI / 2;
+    const cam = nrm(lerp([1.0, 0.62, 0.56], [0.06, 1, 0.1], u));
+    const rt = nrm(crs([0, 0, 1], cam)), up = crs(cam, rt);
+    const faces = [
+      { c: [onF(0, 0), onF(1, 0), onF(1, 1), onF(0, 1)], cut: [onF(1, .5), onF(.5, 1)] },
+      { c: [onR(0, 0, f), onR(0, 1, f), onR(1, 1, f), onR(1, 0, f)], cut: [onR(0, .5, f), onR(.5, 0, f)], open: [onR(1, 0, f), onR(1, 1, f)] },
+      { c: [onT(0, 0, f), onT(1, 0, f), onT(1, 1, f), onT(0, 1, f)], cut: [onT(.5, 0, f), onT(0, .5, f)], open: [onT(1, 0, f), onT(1, 1, f)] },
+    ];
+    const hinges = [[onF(1, 0), onF(1, 1), onF(1, .5)], [onF(0, 1), onF(1, 1), onF(.5, 1)]];
+
+    const all = faces.flatMap(q => q.c);
+    const raw = p => [dot(p, rt), -dot(p, up)];
+    const xs = all.map(p => raw(p)[0]), ys = all.map(p => raw(p)[1]);
+    const S = Math.min(FW * .8 / (Math.max(...xs) - Math.min(...xs)), FH * .8 / (Math.max(...ys) - Math.min(...ys)), 150);
+    const mx = (Math.max(...xs) + Math.min(...xs)) / 2, my = (Math.max(...ys) + Math.min(...ys)) / 2;
+    const pp = p => { const [x, y] = raw(p); return [FW / 2 + (x - mx) * S, FH / 2 + (y - my) * S]; };
+    const line = (a, b, attrs) => { const [p, q] = [pp(a), pp(b)]; s.append(el("line", { x1: p[0], y1: p[1], x2: q[0], y2: q[1], "stroke-linecap": "round", ...attrs })); };
+
+    s.textContent = "";
+    faces.sort((a, b) => dot(a.c[0].map((_, k) => a.c.reduce((t, p) => t + p[k], 0) / 4), cam)
+                        - dot(b.c[0].map((_, k) => b.c.reduce((t, p) => t + p[k], 0) / 4), cam));
+    for (const q of faces) {
+      s.append(el("polygon", { points: q.c.map(pp).map(p => p.join(",")).join(" "),
+        fill: "var(--card)", stroke: "var(--ink)", "stroke-width": 2, "stroke-linejoin": "round" }));
+      if (q.open) line(...q.open, { stroke: "var(--pink)", "stroke-width": 3.4, "stroke-dasharray": "7 6" });
+      line(...q.cut, { stroke: "var(--cut)", "stroke-width": 3.6 });
+    }
+    for (const [a, b, m] of hinges) {
+      line(a, b, { stroke: "var(--sky)", "stroke-width": 3.4 });
+      const [x, y] = pp(m);
+      s.append(el("circle", { cx: x, cy: y, r: 6, fill: "var(--cut)", stroke: "var(--card)", "stroke-width": 2 }));
+    }
+    return u;
+  }
+
+  const fs = document.getElementById("fSlider");
+  let mood = "";
+  function update() {
+    const u = +fs.value;
+    draw(u);
+    let h, m;
+    if (u < .03) { h = "这是正方体上迎面看得到的三个面，红线是<b>正中间那一刀</b>留下的痕。往右拖，沿着棱把它们摊平～"; m = "happy"; }
+    else if (u > .97) { h = "<b>摊平啦！</b>三道痕连成了<b>一条直线</b>，接头都在折缝的中点上。粉色虚线那条棱被剪开了，两边的痕<b>都没碰</b>它。"; m = "wow"; }
+    else { h = "盯住两个红点：它们在折缝上，是两个面<b>共用</b>的，所以两边的痕都走到这儿接上。"; m = "hmm"; }
+    document.getElementById("foldHint").innerHTML = h;
+    if (m !== mood) { document.getElementById("foldPal").replaceChildren(Kit.mascot({ color: "var(--grape)", mood: m, look: 1, size: 58 })); mood = m; }
+  }
+  fs.addEventListener("input", update);
+  update();
+})();
+
+/* ---------- 3. 三条规则的小图 ---------- */
 const MID = { T: [.5, 0], B: [.5, 1], L: [0, .5], R: [1, .5] };
 function cell(parent, x, y, s, cuts, opt = {}) {
   parent.append(el("rect", {
@@ -288,7 +379,7 @@ function mark(parent, x, y, ok) {
   document.getElementById("ruleC").append(s);
 })();
 
-/* ---------- 3. 轮到你判啦 ---------- */
+/* ---------- 4. 轮到你判啦 ---------- */
 // 答案是 base64 的 —— 源码里不留明文，免得直接抄。解法见 kit.js 的 Kit.dec。
 const NETS = [
   { id: "①", cells: [[0,0],[0,1],[0,2],[1,2],[1,3],[1,4]],
