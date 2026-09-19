@@ -13,7 +13,12 @@ dist/                   发布目录，里面放什么就上线什么
 ├── kit.js              全站共用脚本：Kit.dec 解答案、Kit.burst 撒彩纸、Kit.critter / Kit.mascot 画小团子
 ├── _headers            缓存策略
 └── <slug>/index.html   一道题一页
+scripts/check.py        页面约定的机械检查（下面「约定」里能机器查的都在这）
+scripts/deploy.sh       检查 → 部署 → 逐页比对线上
+.githooks/pre-commit    提交前跑 check.py
 ```
+
+新克隆下来先执行一次 `git config core.hooksPath .githooks`，钩子才会生效。
 
 ## 风格
 
@@ -24,6 +29,8 @@ dist/                   发布目录，里面放什么就上线什么
 - 页面分三段：`01` 能拖能点的演示 → `02` 讲道理的规则卡 → `03` 自己判 / 自己选。做完才揭晓终答，给星星和鼓励，可以再来一遍。
 - 答对撒彩纸、卡片弹一下；答错卡片晃一晃，写「再想想」，不写冷冰冰的「错」。
 - 可爱靠颜色、形状、团子和动效撑，**不靠字体**。谷歌字体在大陆常常加载不出来，退回系统字体时也得好看。
+- **题图和原题长得一样。** 摆法、视角照抄作业纸上的图（立体图用课本的斜二测）。演示为了好讲换了摆法，就在页面上加一步从原图变过去，讲明白为什么两种摆法答案一样。
+- **每条规则都讲「怎么来的」。** 规则卡不能只给结论，要连回页面上的演示，让孩子看到规则是从哪一步冒出来的。
 
 ## 加一页
 
@@ -66,12 +73,10 @@ dist/                   发布目录，里面放什么就上线什么
 ## 部署
 
 ```bash
-source ~/.zshrc && npx wrangler pages deploy ./dist --project-name ak-study --branch main --commit-dirty=true
+scripts/deploy.sh
 ```
 
-`source ~/.zshrc` 不能省，Cloudflare 的 token 在里面导出，非交互 subshell 不会自动 load。
-
-部署后等几秒再验。自定义域名切到新部署有延迟，这段时间里新路径还不存在，Cloudflare Pages 会退回首页，看起来像没部署上。
+它先跑 `check.py`，再部署到 Cloudflare Pages 项目 `ak-study`，然后逐页比对 https://study.akbot.top 和本地是否逐字节一致。脚本里会 `source ~/.zshrc`：Cloudflare 的 token 在里面导出，非交互 shell 不会自动加载。自定义域名切到新部署有几秒延迟，其间新路径会退回首页，所以脚本会隔几秒重比。
 
 ## 约定
 
