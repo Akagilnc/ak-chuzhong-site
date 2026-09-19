@@ -76,7 +76,7 @@ scripts/deploy.sh       检查 → 部署 → 逐页比对线上
 scripts/deploy.sh
 ```
 
-它先跑 `check.py`，再部署到 Cloudflare Pages 项目 `ak-study`，然后逐页比对 https://study.akbot.top 和本地是否逐字节一致。脚本里会 `source ~/.zshrc`：Cloudflare 的 token 在里面导出，非交互 shell 不会自动加载。自定义域名切到新部署有几秒延迟，其间新路径会退回首页，所以脚本会隔几秒重比。
+它先跑 `check.py`，再部署到 Cloudflare Pages 项目 `ak-study`，然后逐页比对 https://study.akbot.top 和本地是否逐字节一致。Cloudflare 的 token 在 `~/.zshrc` 里导出，脚本交给 zsh 去读。自定义域名切到新部署有几秒延迟，其间新路径会退回首页，所以脚本会隔几秒重比。
 
 ## 约定
 

@@ -3,8 +3,8 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 python3 scripts/check.py
-source ~/.zshrc >/dev/null 2>&1 || true
-npx wrangler pages deploy ./dist --project-name ak-study --branch main --commit-dirty=true
+# Cloudflare token 在 ~/.zshrc 里导出；bash 直接 source 它会中途退出，交给 zsh 去读
+zsh -c 'source ~/.zshrc >/dev/null 2>&1; npx wrangler pages deploy ./dist --project-name ak-study --branch main --commit-dirty=true'
 
 # 自定义域名切到新部署有几秒延迟，其间新路径会退回首页：隔几秒重比，最多 10 轮
 for round in $(seq 1 10); do
